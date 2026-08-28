@@ -10,8 +10,12 @@ export const MarketplaceBadge = ({ marketplaceId, price, isLowest = false }) => 
   };
 
   return (
-    <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${mp.badgeBg} ${mp.badgeText} ${mp.borderColor}`}>
-      {isLowest && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />}
+    <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md border ${mp.badgeBg} ${mp.badgeText} ${mp.borderColor}`}>
+      {isLowest && (
+        <span className="bg-emerald-600 text-white font-extrabold text-[9px] px-1 py-0.2 rounded uppercase">
+          Best Price
+        </span>
+      )}
       <span>{mp.name}</span>
       {price && <span>₹{price.toLocaleString('en-IN')}</span>}
     </span>
