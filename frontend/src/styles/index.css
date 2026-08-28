@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Centralized Brand & Design Tokens */
+  --color-primary: #0284c7;       /* Royal Cyan / Blue */
+  --color-primary-hover: #0369a1; /* Primary Hover */
+  --color-primary-light: #e0f2fe; /* Light tint for active tabs/badges */
+  
+  --color-secondary: #f59e0b;     /* Amber Gold for deals & ratings */
+  --color-secondary-hover: #d97706;
+
+  --color-bg: #f8fafc;            /* Clean light background */
+  --color-surface: #ffffff;       /* Pure white surface */
+  --color-surface-subtle: #f1f5f9;
+
+  --color-text-primary: #0f172a;   /* Slate 900 */
+  --color-text-secondary: #64748b; /* Slate 500 */
+  --color-border: #e2e8f0;         /* Soft slate border */
+
+  --color-success: #059669;        /* Emerald discount tag */
+  --color-warning: #f59e0b;        /* Amber warning/highlight */
+  --color-danger: #dc2626;         /* Red price alert */
+}
+
+/* Base styles */
+html {
+  scroll-behavior: smooth;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+}
+
+/* Custom utility for hiding scrollbar while preserving scrollability */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
