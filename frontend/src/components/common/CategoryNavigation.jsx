@@ -21,6 +21,20 @@ export const CategoryNavigation = ({ activeCategory, onSelectCategory }) => {
       : ''
   );
 
+  // Category Icon Accents Color Map matching reference screenshot
+  const categoryIconColors = {
+    all: "text-white",
+    kitchen: "text-emerald-600",
+    home: "text-blue-600",
+    electronics: "text-purple-600",
+    beauty: "text-pink-600",
+    fashion: "text-teal-600",
+    mobiles: "text-blue-600",
+    toys: "text-amber-500",
+    gadgets: "text-indigo-600",
+    deals: "text-amber-600",
+  };
+
   // Intelligent scroll position detector
   const checkScrollPosition = useCallback(() => {
     const el = scrollRef.current;
@@ -31,7 +45,6 @@ export const CategoryNavigation = ({ activeCategory, onSelectCategory }) => {
   }, []);
 
   useEffect(() => {
-    // Initial check after DOM render
     const timer = setTimeout(checkScrollPosition, 100);
     window.addEventListener('resize', checkScrollPosition);
     return () => {
@@ -40,7 +53,6 @@ export const CategoryNavigation = ({ activeCategory, onSelectCategory }) => {
     };
   }, [checkScrollPosition]);
 
-  // Smooth scroll handler for chevron buttons
   const handleScroll = (direction) => {
     const el = scrollRef.current;
     if (!el) return;
@@ -61,56 +73,51 @@ export const CategoryNavigation = ({ activeCategory, onSelectCategory }) => {
   };
 
   return (
-    <div className="relative w-full bg-slate-50/90 border-t border-b border-slate-200/80 py-2 px-2 sm:px-4 min-h-[52px] flex items-center overflow-hidden">
+    <div className="relative w-full bg-white border-b border-slate-200/90 py-2.5 px-2 sm:px-4 h-[50px] flex items-center shadow-2xs">
       <div className="max-w-7xl mx-auto relative w-full flex items-center overflow-hidden">
         
         {/* Left Edge Fade & Floating Chevron Left Button */}
         {showLeftArrow && (
           <>
-            <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-slate-50 via-slate-50/90 to-transparent pointer-events-none z-10" />
+            <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-white via-white/90 to-transparent pointer-events-none z-10" />
             <button
               type="button"
               onClick={() => handleScroll('left')}
               aria-label="Scroll categories left"
-              className="absolute left-1 z-20 w-8 h-8 rounded-full bg-white/95 backdrop-blur-xs text-slate-700 hover:text-sky-600 border border-slate-200/90 shadow-sm flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              className="absolute left-1 z-20 w-7 h-7 rounded-full bg-white text-slate-700 hover:text-sky-600 border border-slate-200 shadow-sm flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
           </>
         )}
 
-        {/* Horizontally Scrollable Category List */}
+        {/* Horizontally Scrollable Category List (Uniform Chip Sizing) */}
         <div
           ref={scrollRef}
           onScroll={checkScrollPosition}
-          className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap w-full py-1.5 px-1 sm:px-2"
+          className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap w-full py-1 px-1 sm:px-2"
         >
           {CATEGORIES.map((cat) => {
             const IconComponent = Icons[cat.icon] || Icons.Tag;
             const isActive = currentCategory === cat.slug;
             const isDeal = cat.isSpecial;
+            const iconColor = categoryIconColors[cat.slug] || "text-slate-500";
 
             return (
               <button
                 key={cat.id}
                 onClick={() => handleCategoryClick(cat)}
-                className={`group flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-colors duration-200 border ${
+                className={`group flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all duration-200 h-[34px] border ${
                   isActive
                     ? isDeal 
                       ? 'bg-amber-500 text-white border-amber-500 font-bold shadow-2xs'
-                      : 'bg-sky-600 text-white border-sky-600 font-bold shadow-2xs'
+                      : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-indigo-600 font-bold shadow-2xs'
                     : isDeal
-                    ? 'bg-white text-amber-700 border-amber-300 hover:bg-amber-50 hover:border-amber-500 shadow-2xs'
-                    : 'bg-white text-slate-800 border-slate-200/90 hover:border-sky-500 hover:text-sky-600 hover:bg-sky-50/40 shadow-2xs'
+                    ? 'bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100 shadow-2xs'
+                    : 'bg-white text-slate-800 border-slate-200/90 hover:border-slate-300 hover:bg-slate-50 shadow-2xs'
                 }`}
               >
-                <IconComponent className={`w-3.5 h-3.5 ${
-                  isActive 
-                    ? 'text-white' 
-                    : isDeal 
-                    ? 'text-amber-600' 
-                    : 'text-slate-400 group-hover:text-sky-600 transition-colors'
-                }`} />
+                <IconComponent className={`w-3.5 h-3.5 ${isActive ? 'text-white' : iconColor}`} />
                 <span>{cat.name}</span>
               </button>
             );
@@ -120,12 +127,12 @@ export const CategoryNavigation = ({ activeCategory, onSelectCategory }) => {
         {/* Right Edge Fade & Floating Chevron Right Button */}
         {showRightArrow && (
           <>
-            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-slate-50 via-slate-50/90 to-transparent pointer-events-none z-10" />
+            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white via-white/90 to-transparent pointer-events-none z-10" />
             <button
               type="button"
               onClick={() => handleScroll('right')}
               aria-label="Scroll categories right"
-              className="absolute right-1 z-20 w-8 h-8 rounded-full bg-white/95 backdrop-blur-xs text-slate-700 hover:text-sky-600 border border-slate-200/90 shadow-sm flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              className="absolute right-1 z-20 w-7 h-7 rounded-full bg-white text-slate-700 hover:text-sky-600 border border-slate-200 shadow-sm flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

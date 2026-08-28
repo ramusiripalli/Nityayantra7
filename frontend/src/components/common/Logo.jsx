@@ -2,23 +2,25 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import logoImg from '../../assets/logo.png';
 
-export const Logo = ({ size = 'medium', showTagline = true, className = '' }) => {
+export const Logo = ({ size = 'medium', showTagline = true, variant = 'dark', className = '' }) => {
   const logoSizes = {
-    small: 'h-9 w-9',
-    medium: 'h-[44px] w-[44px]',
+    small: 'h-[38px] w-[38px]',
+    medium: 'h-[46px] w-[46px]',
     large: 'h-14 w-14',
   };
 
   const titleSizes = {
-    small: 'text-base font-extrabold',
-    medium: 'text-[18px] sm:text-[20px] font-black',
+    small: 'text-[16px] sm:text-[17px] font-black',
+    medium: 'text-[19px] sm:text-[21px] font-black',
     large: 'text-2xl font-black',
   };
 
+  const isLight = variant === 'light';
+
   return (
-    <Link to="/" className={`inline-flex items-center gap-2.5 group transition-opacity hover:opacity-95 ${className}`}>
-      {/* Official Logo Container */}
-      <div className={`relative rounded-xl overflow-hidden shadow-2xs border border-slate-200/80 bg-slate-900 shrink-0 ${logoSizes[size] || logoSizes.medium}`}>
+    <Link to="/" className={`inline-flex items-center gap-3 group transition-opacity hover:opacity-95 ${className}`}>
+      {/* Official Logo Container (46px Height on Medium) */}
+      <div className={`relative rounded-xl overflow-hidden shadow-2xs border border-white/20 bg-slate-900 shrink-0 ${logoSizes[size] || logoSizes.medium}`}>
         <img 
           src={logoImg} 
           alt="Nitya Yantra Logo" 
@@ -34,12 +36,12 @@ export const Logo = ({ size = 'medium', showTagline = true, className = '' }) =>
       </div>
 
       {/* Brand Title & Tagline */}
-      <div className="flex flex-col leading-tight">
-        <span className={`tracking-tight text-slate-900 group-hover:text-sky-600 transition-colors ${titleSizes[size] || titleSizes.medium}`}>
+      <div className="flex flex-col justify-center leading-none">
+        <span className={`tracking-tight ${isLight ? 'text-white' : 'text-slate-900 group-hover:text-sky-600'} transition-colors ${titleSizes[size] || titleSizes.medium}`}>
           NITYA YANTRA
         </span>
         {showTagline && (
-          <span className="text-[11px] text-slate-500 font-semibold tracking-wide">
+          <span className={`text-[10px] sm:text-[11px] font-semibold tracking-wide mt-1 ${isLight ? 'text-sky-100 opacity-95' : 'text-slate-500'}`}>
             Smart Gadgets for Everyday Life
           </span>
         )}

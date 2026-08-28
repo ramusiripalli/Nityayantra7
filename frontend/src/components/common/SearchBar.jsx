@@ -3,7 +3,7 @@ import { Search, X } from 'lucide-react';
 import { useSearch } from '../../hooks/useSearch';
 
 export const SearchBar = ({ 
-  placeholder = "Search gadgets, kitchen, electronics...", 
+  placeholder = "Search gadgets, kitchen tools, electronics, deals...", 
   className = "",
   autoFocus = false,
   onSearchSubmit
@@ -16,24 +16,25 @@ export const SearchBar = ({
   };
 
   return (
-    <form onSubmit={onSubmit} className={`relative w-full ${className}`}>
-      <div className="relative flex items-center w-full">
+    <form onSubmit={onSubmit} className={`relative w-full max-w-[480px] lg:max-w-[520px] ${className}`}>
+      <div className="relative flex items-center w-full h-[42px] bg-white rounded-full p-1 pl-4 pr-1 text-slate-800 shadow-md border border-white/40">
+        <Search className="w-4 h-4 text-slate-400 shrink-0 pointer-events-none" />
+        
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder={placeholder}
           autoFocus={autoFocus}
-          aria-label="Search gadgets, kitchen, electronics"
-          className="w-full pl-10 pr-20 py-2.5 bg-slate-100/90 focus:bg-white text-slate-900 text-xs sm:text-sm font-medium rounded-full border border-slate-200/80 focus:border-sky-500 focus:outline-none focus:ring-4 focus:ring-sky-100 transition-all duration-200 shadow-inner"
+          aria-label="Search gadgets, kitchen tools, electronics, deals"
+          className="w-full px-2 py-1.5 bg-transparent text-slate-900 placeholder-slate-400 text-xs sm:text-sm font-medium focus:outline-none"
         />
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-        
+
         {searchTerm && (
           <button
             type="button"
             onClick={clearSearch}
-            className="absolute right-16 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200 transition-colors"
+            className="p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors mr-1 shrink-0"
             aria-label="Clear search"
           >
             <X className="w-3.5 h-3.5" />
@@ -42,7 +43,7 @@ export const SearchBar = ({
 
         <button
           type="submit"
-          className="absolute right-1.5 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-full transition-all duration-200 shadow-2xs hover:shadow-xs active:scale-95"
+          className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-full transition-all duration-200 shadow-xs hover:shadow-md shrink-0 h-full flex items-center justify-center"
         >
           Search
         </button>
