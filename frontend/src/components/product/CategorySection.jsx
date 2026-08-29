@@ -6,7 +6,7 @@ export const CategorySection = ({ title, slug, iconName, products = [] }) => {
   if (!products || products.length === 0) return null;
 
   return (
-    <section className="mb-7 sm:mb-9 last:mb-2">
+    <section className="mb-7 sm:mb-9 last:mb-2 w-full">
       <CategoryHeader
         title={title}
         slug={slug}

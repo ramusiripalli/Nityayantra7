@@ -16,36 +16,7 @@ export const MOCK_PRODUCTS = [
     isTrending: true,
     isBestDeal: true,
     youtubeVideoId: "L_LUpnjgPso",
-    youtubeTitle: "Philips Air Fryer HD9252 Full Indian Cooking Test & Honest Review",
-    shortDescription: "Fry with up to 90% less fat using patented Rapid Air Technology. Features touch screen with 7 presets.",
-    description: "The Philips Digital Air Fryer HD9252/90 brings healthy cooking to your home kitchen. Designed with unique Starfish technology, it creates fast, super-heated air circulation to cook delicious crispy snacks and meals with little to no added oil.",
-    keyFeatures: [
-      "Rapid Air Technology for healthy frying",
-      "7 Preset touch screen programs",
-      "4.1 Liter capacity perfect for a family of 3-4",
-      "Keep Warm function keeps food warm up to 30 mins",
-      "Dishwasher safe quick-clean basket"
-    ],
-    pros: [
-      "Extremely even cooking with crisp textures",
-      "Consumes 90% less oil compared to traditional frying",
-      "Super easy digital touchscreen controls"
-    ],
-    cons: [
-      "Slightly smaller basket capacity for large family parties",
-      "Power cord length could be slightly longer"
-    ],
-    marketplaces: [
-      { id: "amazon", name: "Amazon", price: 7499, originalPrice: 11995, inStock: true, url: "#" },
-      { id: "flipkart", name: "Flipkart", price: 7799, originalPrice: 11995, inStock: true, url: "#" },
-      { id: "meesho", name: "Meesho", price: 8199, originalPrice: 11995, inStock: false, url: "#" }
-    ],
-    specs: {
-      "Brand": "Philips",
-      "Capacity": "4.1 Litres",
-      "Power": "1400 Watts",
-      "Control Method": "Touchscreen"
-    }
+    shortDescription: "Fry with up to 90% less fat using patented Rapid Air Technology. Features touch screen with 7 presets."
   },
   {
     id: "2",
@@ -64,32 +35,7 @@ export const MOCK_PRODUCTS = [
     isTrending: true,
     isBestDeal: true,
     youtubeVideoId: "dQw4w9WgXcQ",
-    youtubeTitle: "Noise ColorFit Pulse 2 Max Unboxing & Water Test",
-    shortDescription: "Massive 1.85\" TFT display with 550 nits brightness, Tru Sync Bluetooth Calling, and 100 sports modes.",
-    description: "Upgrade your daily fitness tracking with the Noise ColorFit Pulse 2 Max. Featuring clear Bluetooth calling capabilities, crisp outdoor visibility, 100+ sports tracking modes, and 10-day battery life.",
-    keyFeatures: [
-      "1.85\" high resolution TFT LCD with 550 nits brightness",
-      "Advanced Tru Sync single-chip Bluetooth calling",
-      "Noise Health Suite: 24x7 SpO2, Heart Rate tracking"
-    ],
-    pros: [
-      "Vibrant display easy to read in direct sunlight",
-      "Clear call clarity via built-in speaker and mic",
-      "Budget friendly price under ₹1,500"
-    ],
-    cons: [
-      "Auto brightness sensor is not included"
-    ],
-    marketplaces: [
-      { id: "amazon", name: "Amazon", price: 1499, originalPrice: 5999, inStock: true, url: "#" },
-      { id: "flipkart", name: "Flipkart", price: 1599, originalPrice: 5999, inStock: true, url: "#" },
-      { id: "myntra", name: "Myntra", price: 1699, originalPrice: 5999, inStock: true, url: "#" }
-    ],
-    specs: {
-      "Brand": "Noise",
-      "Display Size": "1.85 Inches",
-      "Battery Life": "Up to 10 Days"
-    }
+    shortDescription: "Massive 1.85\" TFT display with 550 nits brightness, Tru Sync Bluetooth Calling, and 100 sports modes."
   },
   {
     id: "3",
@@ -108,31 +54,7 @@ export const MOCK_PRODUCTS = [
     isTrending: true,
     isBestDeal: false,
     youtubeVideoId: "dQw4w9WgXcQ",
-    youtubeTitle: "boAt Airdopes 141 Long-term Audio Review & Mic Test",
-    shortDescription: "42 hours massive battery backup, ASAP fast charge (5 mins = 75 mins playtime), ENx noise reduction for calls.",
-    description: "Immerse yourself in rich signature boAt audio. The Airdopes 141 features low latency Beast Mode for mobile gaming and crystal clear calls.",
-    keyFeatures: [
-      "42 Total hours playback with case",
-      "ASAP Charge: 5 minutes gives 75 minutes music",
-      "8mm dynamic drivers with deep bass response"
-    ],
-    pros: [
-      "Punchy bass ideal for Indian music preferences",
-      "Extremely long battery life with compact case"
-    ],
-    cons: [
-      "Touch controls can be overly sensitive"
-    ],
-    marketplaces: [
-      { id: "flipkart", name: "Flipkart", price: 1299, originalPrice: 4490, inStock: true, url: "#" },
-      { id: "amazon", name: "Amazon", price: 1399, originalPrice: 4490, inStock: true, url: "#" },
-      { id: "meesho", name: "Meesho", price: 1449, originalPrice: 4490, inStock: true, url: "#" }
-    ],
-    specs: {
-      "Brand": "boAt",
-      "Playback": "42 Hours",
-      "Drivers": "8mm Dynamic"
-    }
+    shortDescription: "42 hours massive battery backup, ASAP fast charge (5 mins = 75 mins playtime), ENx noise reduction."
   },
   {
     id: "4",
@@ -151,30 +73,7 @@ export const MOCK_PRODUCTS = [
     isTrending: false,
     isBestDeal: true,
     youtubeVideoId: "dQw4w9WgXcQ",
-    youtubeTitle: "Robot Vacuum Cleaning Indian Tiles & Dust Test",
-    shortDescription: "2-in-1 Vacuuming and mopping with 2500Pa strong suction, Dynamic Navigation, and Alexa/Google Home control.",
-    description: "Keep Indian tiled floors dust-free effortlessly. Eufy RoboVac G20 Hybrid intelligently navigates room-by-room, vacuuming fine dust and mopping dried spills.",
-    keyFeatures: [
-      "2-in-1 Vacuuming and active surface mopping",
-      "2500Pa ultra-strong suction power",
-      "Smart Dynamic Navigation with Z-shape cleaning route"
-    ],
-    pros: [
-      "Powerful suction handles pet hair easily",
-      "Quiet operation under 55dB"
-    ],
-    cons: [
-      "Mopping tank water capacity needs refilling for large homes"
-    ],
-    marketplaces: [
-      { id: "amazon", name: "Amazon", price: 16999, originalPrice: 27999, inStock: true, url: "#" },
-      { id: "flipkart", name: "Flipkart", price: 17499, originalPrice: 27999, inStock: true, url: "#" }
-    ],
-    specs: {
-      "Brand": "Eufy",
-      "Suction": "2500 Pa",
-      "Function": "Vacuum + Mop"
-    }
+    shortDescription: "2-in-1 Vacuuming and mopping with 2500Pa strong suction, Dynamic Navigation, and Alexa control."
   },
   {
     id: "5",
@@ -193,31 +92,7 @@ export const MOCK_PRODUCTS = [
     isTrending: true,
     isBestDeal: true,
     youtubeVideoId: "dQw4w9WgXcQ",
-    youtubeTitle: "Pigeon Electric Kettle Boiling Speed & Safety Test",
-    shortDescription: "1500W fast boiling stainless steel electric kettle with auto shut-off & 360 degree swivel base.",
-    description: "Boil water, make instant tea, coffee, or hot noodles in under 3 minutes. The Pigeon Amaze Plus kettle is a household essential.",
-    keyFeatures: [
-      "1.5 Liter capacity",
-      "1500 Watts rapid heating element",
-      "Auto shut-off protection"
-    ],
-    pros: [
-      "Extremely affordable price under ₹600",
-      "Boils full tank of water fast"
-    ],
-    cons: [
-      "Outer stainless body gets hot during boiling"
-    ],
-    marketplaces: [
-      { id: "meesho", name: "Meesho", price: 589, originalPrice: 1245, inStock: true, url: "#" },
-      { id: "amazon", name: "Amazon", price: 599, originalPrice: 1245, inStock: true, url: "#" },
-      { id: "flipkart", name: "Flipkart", price: 629, originalPrice: 1245, inStock: true, url: "#" }
-    ],
-    specs: {
-      "Brand": "Pigeon",
-      "Capacity": "1.5 Litres",
-      "Power": "1500 Watts"
-    }
+    shortDescription: "1500W fast boiling stainless steel electric kettle with auto shut-off & 360 degree swivel base."
   },
   {
     id: "6",
@@ -236,30 +111,7 @@ export const MOCK_PRODUCTS = [
     isTrending: true,
     isBestDeal: false,
     youtubeVideoId: "dQw4w9WgXcQ",
-    youtubeTitle: "OnePlus Nord CE 3 Lite 5G Camera & Gaming Review",
-    shortDescription: "108 MP Camera with 3x Lossless Zoom, 67W SUPERVOOC Fast Charge, 5000 mAh Battery, 120Hz Refresh Rate.",
-    description: "Packed with iconic OnePlus smooth performance. Features a 108MP camera sensor, dual stereo speakers, and blazingly fast 67W SUPERVOOC charging.",
-    keyFeatures: [
-      "108MP Main camera with EIS",
-      "67W SUPERVOOC charging (0 to 80% in 30 mins)",
-      "6.72\" FHD+ 120Hz Adaptive display"
-    ],
-    pros: [
-      "Stunning 108MP daylight photography clarity",
-      "Clean OxygenOS software experience"
-    ],
-    cons: [
-      "LCD panel instead of AMOLED screen"
-    ],
-    marketplaces: [
-      { id: "amazon", name: "Amazon", price: 16999, originalPrice: 19999, inStock: true, url: "#" },
-      { id: "flipkart", name: "Flipkart", price: 17199, originalPrice: 19999, inStock: true, url: "#" }
-    ],
-    specs: {
-      "Brand": "OnePlus",
-      "RAM": "8 GB",
-      "Storage": "128 GB"
-    }
+    shortDescription: "108 MP Camera with 3x Lossless Zoom, 67W SUPERVOOC Fast Charge, 5000 mAh Battery, 120Hz Display."
   },
   {
     id: "7",
@@ -278,31 +130,7 @@ export const MOCK_PRODUCTS = [
     isTrending: true,
     isBestDeal: false,
     youtubeVideoId: "dQw4w9WgXcQ",
-    youtubeTitle: "Minimalist Vitamin C Serum 4-Week Skin Results",
-    shortDescription: "Formulated with 10% Ethyl Ascorbic Acid, a stable Vitamin C derivative. Brightens dull skin and reduces dark spots.",
-    description: "A lightweight, fast-absorbing Vitamin C serum enriched with Centella Asiatica leaf water for soothing radiant skin.",
-    keyFeatures: [
-      "10% Stable Ethyl Ascorbic Acid",
-      "Reduces dark spots & hyperpigmentation",
-      "Fragrance-free and non-comedogenic"
-    ],
-    pros: [
-      "Non-sticky formulation suitable for oily skin",
-      "Visible reduction in acne scars after consistent use"
-    ],
-    cons: [
-      "Requires daily sunscreen application afterward"
-    ],
-    marketplaces: [
-      { id: "myntra", name: "Myntra", price: 645, originalPrice: 699, inStock: true, url: "#" },
-      { id: "amazon", name: "Amazon", price: 664, originalPrice: 699, inStock: true, url: "#" },
-      { id: "flipkart", name: "Flipkart", price: 675, originalPrice: 699, inStock: true, url: "#" }
-    ],
-    specs: {
-      "Brand": "Minimalist",
-      "Volume": "30 ml",
-      "Skin Type": "All Skin Types"
-    }
+    shortDescription: "Formulated with 10% Ethyl Ascorbic Acid, a stable Vitamin C derivative. Brightens dull skin."
   },
   {
     id: "8",
@@ -321,31 +149,7 @@ export const MOCK_PRODUCTS = [
     isTrending: true,
     isBestDeal: true,
     youtubeVideoId: "dQw4w9WgXcQ",
-    youtubeTitle: "Winter Jacket Try-On & Fit Review",
-    shortDescription: "Warm yet ultra-light weight polyfill insulation with windproof shell and zip-off detachable hood.",
-    description: "Stay warm in style. Designed for everyday winter travel with deep zippered pockets and packable travel pouch.",
-    keyFeatures: [
-      "100% Windproof & splash resistant shell",
-      "Ultra lightweight polyfill insulation",
-      "Detachable hood with elastic drawstring"
-    ],
-    pros: [
-      "Folds compactly into included travel pouch",
-      "High quality YKK zipper closure"
-    ],
-    cons: [
-      "Fits slightly slim; size up for heavy sweater layering"
-    ],
-    marketplaces: [
-      { id: "myntra", name: "Myntra", price: 1899, originalPrice: 3999, inStock: true, url: "#" },
-      { id: "flipkart", name: "Flipkart", price: 1999, originalPrice: 3999, inStock: true, url: "#" },
-      { id: "amazon", name: "Amazon", price: 2199, originalPrice: 3999, inStock: true, url: "#" }
-    ],
-    specs: {
-      "Material": "Polyester",
-      "Insulation": "Synthetic Polyfill",
-      "Care": "Machine Wash Cold"
-    }
+    shortDescription: "Warm yet ultra-light weight polyfill insulation with windproof shell and zip-off detachable hood."
   },
   {
     id: "9",
@@ -364,29 +168,474 @@ export const MOCK_PRODUCTS = [
     isTrending: false,
     isBestDeal: false,
     youtubeVideoId: "dQw4w9WgXcQ",
-    youtubeTitle: "LEGO Creative Bricks Build Challenge for Kids",
-    shortDescription: "Designed with builders of all ages in mind. Includes bricks in 35 different colors, wheels, windows & eye pieces.",
-    description: "Inspire open-ended creativity and motor skills with this classic 484-piece LEGO construction brick set.",
-    keyFeatures: [
-      "484 Bricks in 35 vibrant colors",
-      "Includes 18 tires and wheel rims",
-      "Sturdy plastic storage yellow tub"
-    ],
-    pros: [
-      "Encourages creative STEM learning",
-      "Compatible with all LEGO construction sets"
-    ],
-    cons: [
-      "Small pieces require adult supervision for toddlers under 3"
-    ],
-    marketplaces: [
-      { id: "amazon", name: "Amazon", price: 2499, originalPrice: 3299, inStock: true, url: "#" },
-      { id: "flipkart", name: "Flipkart", price: 2699, originalPrice: 3299, inStock: true, url: "#" }
-    ],
-    specs: {
-      "Brand": "LEGO",
-      "Pieces": "484",
-      "Age Range": "4 to 99 Years"
-    }
+    shortDescription: "Includes bricks in 35 different colors, wheels, windows & eye pieces. Great for STEM learning."
+  },
+  {
+    id: "10",
+    title: "Prestige Iris 750W Mixer Grinder with 3 Stainless Steel Jars",
+    slug: "prestige-iris-750w-mixer-grinder",
+    category: "kitchen",
+    image: "https://images.unsplash.com/photo-1570222094114-d054a817e56b?auto=format&fit=crop&w=600&q=80",
+    rating: 4.4,
+    reviewCount: 45200,
+    currentPrice: 2899,
+    originalPrice: 6195,
+    discountPercent: 53,
+    lowestMarketplace: "flipkart",
+    isFeatured: true,
+    isTrending: true,
+    shortDescription: "750 Watt heavy duty motor with 3 stainless steel grinding jars and 1 juicer jar."
+  },
+  {
+    id: "11",
+    title: "Kent Instant 360W Automatic Egg Boiler (Boils 7 Eggs)",
+    slug: "kent-instant-egg-boiler",
+    category: "kitchen",
+    image: "https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?auto=format&fit=crop&w=600&q=80",
+    rating: 4.5,
+    reviewCount: 12800,
+    currentPrice: 999,
+    originalPrice: 1800,
+    discountPercent: 44,
+    lowestMarketplace: "amazon",
+    shortDescription: "Boils 7 eggs in 3 modes: soft, medium and hard with automatic shut-off safety."
+  },
+  {
+    id: "12",
+    title: "Wonderchef Nutri-Blend 22000 RPM Mixer Blender (400W)",
+    slug: "wonderchef-nutri-blend-400w",
+    category: "kitchen",
+    image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80",
+    rating: 4.6,
+    reviewCount: 22100,
+    currentPrice: 2499,
+    originalPrice: 5000,
+    discountPercent: 50,
+    lowestMarketplace: "amazon",
+    shortDescription: "High-speed 22000 RPM blender extracts full nutrients from smoothies, shakes & masalas."
+  },
+  {
+    id: "13",
+    title: "Morphy Richards 25L Convection Oven Toast Grill (OTG)",
+    slug: "morphy-richards-25l-otg",
+    category: "kitchen",
+    image: "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80",
+    rating: 4.5,
+    reviewCount: 6800,
+    currentPrice: 7299,
+    originalPrice: 11490,
+    discountPercent: 36,
+    lowestMarketplace: "flipkart",
+    shortDescription: "25 Litres capacity suitable for baking, grilling, and roasting for medium families."
+  },
+  {
+    id: "14",
+    title: "Dyson V12 Detect Slim Cordless Vacuum Cleaner",
+    slug: "dyson-v12-detect-slim",
+    category: "home",
+    image: "https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&w=600&q=80",
+    rating: 4.8,
+    reviewCount: 940,
+    currentPrice: 45900,
+    originalPrice: 55900,
+    discountPercent: 17,
+    lowestMarketplace: "amazon",
+    isFeatured: true,
+    shortDescription: "Laser reveals microscopic dust. Intelligently adapts suction power based on floor type."
+  },
+  {
+    id: "15",
+    title: "Philips Air Purifier AC1215/20 with True HEPA Filter",
+    slug: "philips-air-purifier-ac1215",
+    category: "home",
+    image: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=600&q=80",
+    rating: 4.5,
+    reviewCount: 14200,
+    currentPrice: 9499,
+    originalPrice: 12995,
+    discountPercent: 27,
+    lowestMarketplace: "amazon",
+    shortDescription: "Removes 99.97% airborne pollutants and PM2.5 particles. Real-time air quality display."
+  },
+  {
+    id: "16",
+    title: "Atomberg Renesa 1200mm BLDC Motor Energy Saving Ceiling Fan",
+    slug: "atomberg-renesa-bldc-fan",
+    category: "home",
+    image: "https://images.unsplash.com/photo-1615873968403-89e068629265?auto=format&fit=crop&w=600&q=80",
+    rating: 4.6,
+    reviewCount: 31000,
+    currentPrice: 3699,
+    originalPrice: 5490,
+    discountPercent: 32,
+    lowestMarketplace: "amazon",
+    shortDescription: "Consumes only 28W electricity. Saves up to ₹1,500/year on electricity bills. Includes Remote."
+  },
+  {
+    id: "17",
+    title: "Havells Instanio 3L 3000W Instant Water Heater Geyser",
+    slug: "havells-instanio-3l-geyser",
+    category: "home",
+    image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=600&q=80",
+    rating: 4.4,
+    reviewCount: 18400,
+    currentPrice: 3299,
+    originalPrice: 5990,
+    discountPercent: 45,
+    lowestMarketplace: "flipkart",
+    shortDescription: "Color-changing LED indicator for hot water readiness. Ultra thick stainless steel inner tank."
+  },
+  {
+    id: "18",
+    title: "Sony WH-1000XM5 Wireless Industry Leading Noise Cancelling Headphones",
+    slug: "sony-wh-1000xm5-headphones",
+    category: "electronics",
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80",
+    rating: 4.8,
+    reviewCount: 8900,
+    currentPrice: 28990,
+    originalPrice: 34990,
+    discountPercent: 17,
+    lowestMarketplace: "amazon",
+    isFeatured: true,
+    shortDescription: "Auto NC Optimizer with 8 microphones & HD Noise Canceling Processor QN1. 30 hours battery."
+  },
+  {
+    id: "19",
+    title: "JBL Flip 6 Portable Waterproof Bluetooth Speaker (30W)",
+    slug: "jbl-flip-6-bluetooth-speaker",
+    category: "electronics",
+    image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=600&q=80",
+    rating: 4.7,
+    reviewCount: 16400,
+    currentPrice: 9999,
+    originalPrice: 13999,
+    discountPercent: 28,
+    lowestMarketplace: "amazon",
+    shortDescription: "IP67 Waterproof & dustproof with 2-way speaker system for bold, powerful sound."
+  },
+  {
+    id: "20",
+    title: "Fire-Boltt Ninja Call Pro Plus 1.83\" Smartwatch with Bluetooth Calling",
+    slug: "fire-boltt-ninja-call-pro-plus",
+    category: "electronics",
+    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80",
+    rating: 4.3,
+    reviewCount: 42000,
+    currentPrice: 1199,
+    originalPrice: 9999,
+    discountPercent: 88,
+    lowestMarketplace: "flipkart",
+    shortDescription: "1.83 inch HD display with 100+ sports modes, AI Voice Assistant, and SpO2 monitoring."
+  },
+  {
+    id: "21",
+    title: "Realme Buds Air 5 Pro TWS with 50dB Active Noise Cancellation",
+    slug: "realme-buds-air-5-pro",
+    category: "electronics",
+    image: "https://images.unsplash.com/photo-1572536147248-ac59a8abfa4b?auto=format&fit=crop&w=600&q=80",
+    rating: 4.5,
+    reviewCount: 7800,
+    currentPrice: 4999,
+    originalPrice: 7999,
+    discountPercent: 37,
+    lowestMarketplace: "amazon",
+    shortDescription: "Coaxial dual drivers with Hi-Res Audio certification, LDAC codec & 40 hours total playtime."
+  },
+  {
+    id: "22",
+    title: "Maybelline New York Super Stay Matte Ink Liquid Lipstick (5ml)",
+    slug: "maybelline-superstay-matte-lipstick",
+    category: "beauty",
+    image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=600&q=80",
+    rating: 4.5,
+    reviewCount: 52000,
+    currentPrice: 489,
+    originalPrice: 699,
+    discountPercent: 30,
+    lowestMarketplace: "myntra",
+    shortDescription: "16-hour long-lasting transfer-proof matte liquid formula with arrow applicator."
+  },
+  {
+    id: "23",
+    title: "L'Oreal Paris Extraordinary Hair Serum 100ml for Soft & Shiny Hair",
+    slug: "loreal-extraordinary-oil-hair-serum",
+    category: "beauty",
+    image: "https://images.unsplash.com/photo-1608248597261-833258657b39?auto=format&fit=crop&w=600&q=80",
+    rating: 4.6,
+    reviewCount: 38900,
+    currentPrice: 499,
+    originalPrice: 649,
+    discountPercent: 23,
+    lowestMarketplace: "myntra",
+    shortDescription: "Enriched with 6 rare flower oils. Multi-use serum tames frizz and adds radiant shine."
+  },
+  {
+    id: "24",
+    title: "The Derma Co 10% Niacinamide Face Serum with Zinc (30ml)",
+    slug: "derma-co-10-niacinamide-serum",
+    category: "beauty",
+    image: "https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&w=600&q=80",
+    rating: 4.4,
+    reviewCount: 16500,
+    currentPrice: 539,
+    originalPrice: 599,
+    discountPercent: 10,
+    lowestMarketplace: "amazon",
+    shortDescription: "Niacinamide & Zinc formula treats acne marks, reduces blemishes, and balances sebum."
+  },
+  {
+    id: "25",
+    title: "Neutrogena Hydro Boost Water Gel Face Moisturizer (50g)",
+    slug: "neutrogena-hydro-boost-water-gel",
+    category: "beauty",
+    image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80",
+    rating: 4.7,
+    reviewCount: 24100,
+    currentPrice: 880,
+    originalPrice: 1050,
+    discountPercent: 16,
+    lowestMarketplace: "myntra",
+    shortDescription: "Hyaluronic Acid formula absorbs instantly for 72-hour continuous hydration boost."
+  },
+  {
+    id: "26",
+    title: "Levi's Men's 511 Slim Fit Stretchable Denim Jeans",
+    slug: "levis-mens-511-slim-fit-jeans",
+    category: "fashion",
+    image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=600&q=80",
+    rating: 4.5,
+    reviewCount: 9800,
+    currentPrice: 2399,
+    originalPrice: 3999,
+    discountPercent: 40,
+    lowestMarketplace: "myntra",
+    shortDescription: "Classic 5-pocket slim fit styling crafted from premium stretch cotton denim."
+  },
+  {
+    id: "27",
+    title: "Puma Men's Smash v2 Leather Casual Sneakers",
+    slug: "puma-mens-smash-v2-sneakers",
+    category: "fashion",
+    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80",
+    rating: 4.4,
+    reviewCount: 21500,
+    currentPrice: 2249,
+    originalPrice: 4999,
+    discountPercent: 55,
+    lowestMarketplace: "myntra",
+    shortDescription: "Tennis-inspired leather low boot profile with SoftFoam+ sockliner for cushioning."
+  },
+  {
+    id: "28",
+    title: "U.S. Polo Assn. Men's Solid Regular Fit Cotton Polo T-Shirt",
+    slug: "us-polo-assn-mens-cotton-polo",
+    category: "fashion",
+    image: "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?auto=format&fit=crop&w=600&q=80",
+    rating: 4.3,
+    reviewCount: 14700,
+    currentPrice: 1099,
+    originalPrice: 1999,
+    discountPercent: 45,
+    lowestMarketplace: "flipkart",
+    shortDescription: "100% breathable pique cotton with signature embroidered USPA brand logo."
+  },
+  {
+    id: "29",
+    title: "Allen Solly Men's Cotton Casual Button-Down Shirt",
+    slug: "allen-solly-mens-casual-shirt",
+    category: "fashion",
+    image: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=600&q=80",
+    rating: 4.4,
+    reviewCount: 8200,
+    currentPrice: 1199,
+    originalPrice: 2299,
+    discountPercent: 48,
+    lowestMarketplace: "myntra",
+    shortDescription: "Lightweight premium cotton shirt tailored for everyday work and weekend wear."
+  },
+  {
+    id: "30",
+    title: "Apple iPhone 15 (128GB, Blue) with Dynamic Island & 48MP Main Camera",
+    slug: "apple-iphone-15-128gb-blue",
+    category: "mobiles",
+    image: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?auto=format&fit=crop&w=600&q=80",
+    rating: 4.8,
+    reviewCount: 18900,
+    currentPrice: 70900,
+    originalPrice: 79900,
+    discountPercent: 11,
+    lowestMarketplace: "amazon",
+    isFeatured: true,
+    shortDescription: "Dynamic Island, 48MP Main camera with 2x Telephoto, A16 Bionic chip, USB-C connectivity."
+  },
+  {
+    id: "31",
+    title: "Samsung Galaxy S23 FE 5G (8GB RAM, 128GB Storage)",
+    slug: "samsung-galaxy-s23-fe-5g",
+    category: "mobiles",
+    image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=600&q=80",
+    rating: 4.5,
+    reviewCount: 11200,
+    currentPrice: 38999,
+    originalPrice: 59999,
+    discountPercent: 35,
+    lowestMarketplace: "amazon",
+    shortDescription: "Pro-grade 50MP camera, Exynos 2200 4nm processor, Dynamic AMOLED 2X 120Hz display."
+  },
+  {
+    id: "32",
+    title: "Redmi Note 13 Pro 5G (8GB RAM, 256GB Storage, Coral Purple)",
+    slug: "redmi-note-13-pro-5g",
+    category: "mobiles",
+    image: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=600&q=80",
+    rating: 4.4,
+    reviewCount: 21800,
+    currentPrice: 24999,
+    originalPrice: 28999,
+    discountPercent: 14,
+    lowestMarketplace: "flipkart",
+    shortDescription: "200MP OIS Camera, 1.5K 120Hz 3D Curved AMOLED display, Snapdragon 7s Gen 2."
+  },
+  {
+    id: "33",
+    title: "Realme 12 Pro+ 5G (12GB RAM, 256GB Storage, Submarine Blue)",
+    slug: "realme-12-pro-plus-5g",
+    category: "mobiles",
+    image: "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?auto=format&fit=crop&w=600&q=80",
+    rating: 4.6,
+    reviewCount: 9400,
+    currentPrice: 29999,
+    originalPrice: 34999,
+    discountPercent: 14,
+    lowestMarketplace: "amazon",
+    shortDescription: "64MP Periscope Telephoto camera with 120x SuperZoom & Luxury Watch Design."
+  },
+  {
+    id: "34",
+    title: "Hot Wheels Die-Cast 5-Car Gift Pack (1:64 Scale Vehicles)",
+    slug: "hot-wheels-5-car-gift-pack",
+    category: "toys",
+    image: "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?auto=format&fit=crop&w=600&q=80",
+    rating: 4.7,
+    reviewCount: 16800,
+    currentPrice: 699,
+    originalPrice: 899,
+    discountPercent: 22,
+    lowestMarketplace: "amazon",
+    shortDescription: "Set of 5 1:64 scale die-cast metal vehicles with authentic details and realistic decos."
+  },
+  {
+    id: "35",
+    title: "Nerf Elite 2.0 Commander RD-6 Blaster with 12 Official Darts",
+    slug: "nerf-elite-2-commander-rd6",
+    category: "toys",
+    image: "https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?auto=format&fit=crop&w=600&q=80",
+    rating: 4.6,
+    reviewCount: 8900,
+    currentPrice: 1199,
+    originalPrice: 1799,
+    discountPercent: 33,
+    lowestMarketplace: "amazon",
+    shortDescription: "6-dart rotating drum blaster with slam fire action and tactical attachment points."
+  },
+  {
+    id: "36",
+    title: "Barbie Dreamhouse 3-Story Dollhouse Playset with Slide",
+    slug: "barbie-dreamhouse-playset",
+    category: "toys",
+    image: "https://images.unsplash.com/photo-1560807707-8cc77767d783?auto=format&fit=crop&w=600&q=80",
+    rating: 4.8,
+    reviewCount: 3200,
+    currentPrice: 17999,
+    originalPrice: 22999,
+    discountPercent: 22,
+    lowestMarketplace: "amazon",
+    shortDescription: "3-story dollhouse featuring 10 outdoor & indoor living areas, working elevator & pool."
+  },
+  {
+    id: "37",
+    title: "Monopoly Deluxe Edition Fast-Dealing Property Board Game",
+    slug: "monopoly-deluxe-edition-board-game",
+    category: "toys",
+    image: "https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&w=600&q=80",
+    rating: 4.7,
+    reviewCount: 24500,
+    currentPrice: 999,
+    originalPrice: 1499,
+    discountPercent: 33,
+    lowestMarketplace: "flipkart",
+    shortDescription: "Classic family property trading game with die-cast tokens and speed die."
+  },
+  {
+    id: "38",
+    title: "Portronics Dash 12 Wireless 20W Bluetooth Speaker with Karaoke Mic",
+    slug: "portronics-dash-12-speaker-mic",
+    category: "gadgets",
+    image: "https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=600&q=80",
+    rating: 4.4,
+    reviewCount: 7100,
+    currentPrice: 2499,
+    originalPrice: 4999,
+    discountPercent: 50,
+    lowestMarketplace: "amazon",
+    shortDescription: "20W portable party speaker with RGB LED lights and wireless karaoke microphone."
+  },
+  {
+    id: "39",
+    title: "Ambrane 20000mAh Power Bank with 22.5W Fast Charging",
+    slug: "ambrane-20000mah-power-bank",
+    category: "gadgets",
+    image: "https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=600&q=80",
+    rating: 4.3,
+    reviewCount: 38200,
+    currentPrice: 1699,
+    originalPrice: 3499,
+    discountPercent: 51,
+    lowestMarketplace: "amazon",
+    shortDescription: "20000mAh lithium polymer battery with 22.5W Power Delivery & Quick Charge 3.0."
+  },
+  {
+    id: "40",
+    title: "Logitech MX Master 3S Wireless Performance Ergonomic Mouse",
+    slug: "logitech-mx-master-3s-mouse",
+    category: "gadgets",
+    image: "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=600&q=80",
+    rating: 4.8,
+    reviewCount: 6200,
+    currentPrice: 9495,
+    originalPrice: 10995,
+    discountPercent: 14,
+    lowestMarketplace: "amazon",
+    isFeatured: true,
+    shortDescription: "8K DPI track-on-glass sensor with Quiet Clicks and MagSpeed electromagnetic scrolling."
+  },
+  {
+    id: "41",
+    title: "TP-Link Archer AC1200 Smart Wi-Fi Dual Band Gigabit Router",
+    slug: "tp-link-archer-ac1200-router",
+    category: "gadgets",
+    image: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=600&q=80",
+    rating: 4.5,
+    reviewCount: 29400,
+    currentPrice: 2499,
+    originalPrice: 4999,
+    discountPercent: 50,
+    lowestMarketplace: "amazon",
+    shortDescription: "Dual band Wi-Fi up to 1200 Mbps with 4 external antennas and MU-MIMO technology."
+  },
+  {
+    id: "42",
+    title: "SanDisk 128GB Ultra Dual Drive Luxe USB Type-C Flash Drive",
+    slug: "sandisk-128gb-type-c-flash-drive",
+    category: "gadgets",
+    image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=600&q=80",
+    rating: 4.6,
+    reviewCount: 41200,
+    currentPrice: 1299,
+    originalPrice: 2200,
+    discountPercent: 41,
+    lowestMarketplace: "amazon",
+    shortDescription: "2-in-1 all-metal flash drive with reversible USB Type-C and traditional Type-A connectors."
   }
 ];
