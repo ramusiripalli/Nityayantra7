@@ -1,24 +1,54 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import connectDB from './config/db.js';
+import healthRoutes from './routes/healthRoutes.js';
+import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
+// Load Environment Variables
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:3000' }));
+// CORS Configuration
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.CLIENT_URL
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, true); // Permissive in dev, configurable for prod
+    },
+    credentials: true,
+  })
+);
+
+// Express Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Health Check Endpoint
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    message: 'Nitya Yantra API Backend Service Running',
-    timestamp: new Date().toISOString()
+// API Routes
+app.use('/api/health', healthRoutes);
+
+// Error Handling Middleware
+app.use(notFound);
+app.use(errorHandler);
+
+// Start Server Flow: Connect DB -> Listen
+const startServer = async () => {
+  await connectDB();
+  app.listen(PORT, () => {
+    console.log(`🚀 Nitya Yantra Backend Server running on port ${PORT}`);
+    console.log(`📡 Health Check URL: http://localhost:${PORT}/api/health`);
   });
-});
+};
 
-app.listen(PORT, () => {
-  console.log(`🚀 Nitya Yantra Backend Server running on port ${PORT}`);
-});
+startServer();

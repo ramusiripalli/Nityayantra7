@@ -1,6 +1,6 @@
-# Dependencies
-node_modules/
-
-# Local env files
+node_modules
 .env
 .env.local
+dist
+build
+*.log
