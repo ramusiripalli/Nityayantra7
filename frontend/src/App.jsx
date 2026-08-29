@@ -16,6 +16,7 @@ import ProtectedAdminRoute from './admin/components/ProtectedAdminRoute';
 import AdminLayout from './admin/layouts/AdminLayout';
 import AdminDashboard from './admin/pages/AdminDashboard';
 import AdminProducts from './admin/pages/AdminProducts';
+import AdminProductForm from './admin/pages/AdminProductForm';
 import AdminCategories from './admin/pages/AdminCategories';
 import AdminPlaceholder from './admin/pages/AdminPlaceholder';
 
@@ -41,8 +42,8 @@ export function App() {
           <Route element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="products" element={<AdminProducts />} />
-            <Route path="products/new" element={<AdminPlaceholder />} />
-            <Route path="products/:id/edit" element={<AdminPlaceholder />} />
+            <Route path="products/new" element={<AdminProductForm />} />
+            <Route path="products/:id/edit" element={<AdminProductForm />} />
             <Route path="categories" element={<AdminCategories />} />
             <Route path="settings" element={<AdminPlaceholder />} />
           </Route>

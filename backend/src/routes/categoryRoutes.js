@@ -4,6 +4,7 @@ import {
   getCategoryById,
   createCategory,
   updateCategory,
+  toggleCategoryStatus,
   deleteCategory,
   getCategoryProducts
 } from '../controllers/categoryController.js';
@@ -15,6 +16,10 @@ const router = express.Router();
 router.route('/')
   .get(getCategories)
   .post(protect, requireAdmin, createCategory);
+
+// Status Toggle Endpoint (PATCH requires Admin)
+router.route('/:id/status')
+  .patch(protect, requireAdmin, toggleCategoryStatus);
 
 // Single Category Endpoints (GET is Public, PUT/DELETE require Admin)
 router.route('/:id')

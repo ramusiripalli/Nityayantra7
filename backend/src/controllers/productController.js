@@ -4,6 +4,30 @@ import asyncHandler from '../utils/asyncHandler.js';
 import mongoose from 'mongoose';
 
 /**
+ * Extract YouTube Video ID from standard or shortened YouTube URLs
+ */
+const extractYouTubeVideoId = (url) => {
+  if (!url || typeof url !== 'string') return '';
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.trim().match(regExp);
+  return match && match[2].length === 11 ? match[2] : '';
+};
+
+/**
+ * Calculate highest discount percentage from marketplace offers
+ */
+const calculateHighestDiscount = (offers) => {
+  if (!offers || !Array.isArray(offers) || offers.length === 0) return 0;
+  const discounts = offers.map((o) => {
+    if (o.originalPrice && o.originalPrice > o.price) {
+      return Math.round(((o.originalPrice - o.price) / o.originalPrice) * 100);
+    }
+    return o.discount || 0;
+  });
+  return Math.max(0, ...discounts);
+};
+
+/**
  * @desc    Get all products with pagination, search, filters & sorting
  * @route   GET /api/products
  * @access  Public
@@ -25,11 +49,13 @@ export const getProducts = asyncHandler(async (req, res) => {
   // Base Query Filter
   const query = {};
 
-  // 1. Published Status (Default: only published products)
-  if (published !== undefined) {
+  // 1. Published Status Filter (Admin query can request published=all)
+  if (published === 'all') {
+    // Admin request for all published and unpublished products
+  } else if (published !== undefined) {
     query.isPublished = published === 'true';
   } else {
-    query.isPublished = true;
+    query.isPublished = true; // Public default
   }
 
   query.isActive = true;
@@ -47,12 +73,10 @@ export const getProducts = asyncHandler(async (req, res) => {
     if (mongoose.Types.ObjectId.isValid(category)) {
       query.category = category;
     } else {
-      // Find category by slug
       const catObj = await Category.findOne({ slug: category.toLowerCase() });
       if (catObj) {
         query.category = catObj._id;
       } else {
-        // If category slug not found, return empty results cleanly
         return res.status(200).json({
           success: true,
           data: {
@@ -76,7 +100,7 @@ export const getProducts = asyncHandler(async (req, res) => {
   }
 
   // 5. Sorting Options
-  let sortOption = { createdAt: -1 }; // default newest
+  let sortOption = { createdAt: -1 };
 
   switch (sort) {
     case 'featured':
@@ -151,7 +175,7 @@ export const getProductById = asyncHandler(async (req, res) => {
 /**
  * @desc    Create a new product
  * @route   POST /api/products
- * @access  Public (Admin)
+ * @access  Private (Admin)
  */
 export const createProduct = asyncHandler(async (req, res) => {
   const {
@@ -178,19 +202,34 @@ export const createProduct = asyncHandler(async (req, res) => {
   } = req.body;
 
   // 1. Required Field Validation
-  if (!name || !slug || !description || !category) {
+  if (!name || !name.trim()) {
     res.status(400);
-    throw new Error('Product name, slug, description, and category are required');
+    throw new Error('Product name is required');
   }
 
-  if (!images || !Array.isArray(images) || images.length === 0) {
+  if (!slug || !slug.trim()) {
     res.status(400);
-    throw new Error('At least one product image is required');
+    throw new Error('Product slug is required');
   }
 
-  if (!marketplaceOffers || !Array.isArray(marketplaceOffers) || marketplaceOffers.length === 0) {
+  if (!description || !description.trim()) {
     res.status(400);
-    throw new Error('At least one marketplace offer is required');
+    throw new Error('Product description is required');
+  }
+
+  if (!category) {
+    res.status(400);
+    throw new Error('Category reference is required');
+  }
+
+  if (!images || !Array.isArray(images) || images.length === 0 || !images[0]?.url) {
+    res.status(400);
+    throw new Error('At least one product image with a valid URL is required');
+  }
+
+  if (!marketplaceOffers || !Array.isArray(marketplaceOffers) || marketplaceOffers.length === 0 || !marketplaceOffers[0]?.url || marketplaceOffers[0]?.price === undefined) {
+    res.status(400);
+    throw new Error('At least one marketplace offer with a valid URL and price is required');
   }
 
   // 2. Verify Category Exists & Is Active
@@ -218,20 +257,32 @@ export const createProduct = asyncHandler(async (req, res) => {
     throw new Error(`Product with slug '${slug}' already exists`);
   }
 
-  // 4. Create Product
+  // 4. Auto-extract YouTube Video ID if omitted
+  const formattedVideos = { ...videos };
+  if (formattedVideos.youtubeUrl && !formattedVideos.youtubeVideoId) {
+    formattedVideos.youtubeVideoId = extractYouTubeVideoId(formattedVideos.youtubeUrl);
+  }
+
+  // 5. Calculate fallback discountPercent if omitted
+  const finalDiscountPercent =
+    discountPercent !== undefined && discountPercent > 0
+      ? discountPercent
+      : calculateHighestDiscount(marketplaceOffers);
+
+  // 6. Create Product
   const product = await Product.create({
     name: name.trim(),
     slug: cleanSlug,
     description: description.trim(),
-    shortDescription: shortDescription || '',
+    shortDescription: shortDescription ? shortDescription.trim() : '',
     category: categoryDoc._id,
     images,
-    videos: videos || {},
+    videos: formattedVideos,
     marketplaceOffers,
-    rating: rating || 0,
-    reviewCount: reviewCount || 0,
-    editorialRating: editorialRating || undefined,
-    discountPercent: discountPercent || 0,
+    rating: rating !== undefined ? Number(rating) : 0,
+    reviewCount: reviewCount !== undefined ? Number(reviewCount) : 0,
+    editorialRating: editorialRating !== undefined && editorialRating !== '' ? Number(editorialRating) : undefined,
+    discountPercent: Number(finalDiscountPercent),
     keyFeatures: keyFeatures || [],
     specs: specs || {},
     pros: pros || [],
@@ -253,7 +304,7 @@ export const createProduct = asyncHandler(async (req, res) => {
 /**
  * @desc    Update an existing product
  * @route   PUT /api/products/:id
- * @access  Public (Admin)
+ * @access  Private (Admin)
  */
 export const updateProduct = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -289,7 +340,7 @@ export const updateProduct = asyncHandler(async (req, res) => {
   }
 
   // If slug is being updated, verify no conflict
-  if (req.body.slug && req.body.slug.toLowerCase() !== product.slug) {
+  if (req.body.slug && req.body.slug.toLowerCase().trim() !== product.slug) {
     const cleanSlug = req.body.slug.toLowerCase().trim();
     const slugConflict = await Product.findOne({ slug: cleanSlug });
     if (slugConflict) {
@@ -297,6 +348,16 @@ export const updateProduct = asyncHandler(async (req, res) => {
       throw new Error(`Product slug '${cleanSlug}' is already in use`);
     }
     req.body.slug = cleanSlug;
+  }
+
+  // Auto-extract YouTube Video ID if omitted
+  if (req.body.videos && req.body.videos.youtubeUrl && !req.body.videos.youtubeVideoId) {
+    req.body.videos.youtubeVideoId = extractYouTubeVideoId(req.body.videos.youtubeUrl);
+  }
+
+  // Auto-calculate discountPercent if omitted/zero
+  if (req.body.marketplaceOffers && (!req.body.discountPercent || req.body.discountPercent === 0)) {
+    req.body.discountPercent = calculateHighestDiscount(req.body.marketplaceOffers);
   }
 
   // Update fields
@@ -313,7 +374,7 @@ export const updateProduct = asyncHandler(async (req, res) => {
 /**
  * @desc    Delete a product by ID
  * @route   DELETE /api/products/:id
- * @access  Public (Admin)
+ * @access  Private (Admin)
  */
 export const deleteProduct = asyncHandler(async (req, res) => {
   const { id } = req.params;

@@ -4,20 +4,47 @@ import asyncHandler from '../utils/asyncHandler.js';
 import mongoose from 'mongoose';
 
 /**
- * @desc    Get all categories
+ * @desc    Get all categories with search, status filtering, and count metadata
  * @route   GET /api/categories
- * @access  Public
+ * @access  Public (Default returns active categories; Admin query options supported)
  */
 export const getCategories = asyncHandler(async (req, res) => {
-  const { all } = req.query;
-  const filter = all === 'true' ? {} : { isActive: true };
+  const { all, isActive, search } = req.query;
 
-  // Sort alphabetically by name
+  // Base Query Filter
+  const filter = {};
+
+  // Public default returns active categories unless 'all' or explicit 'isActive' parameter is supplied
+  if (all === 'true') {
+    // Return all categories (active & inactive)
+  } else if (isActive !== undefined) {
+    filter.isActive = isActive === 'true';
+  } else {
+    filter.isActive = true; // Default public filter
+  }
+
+  // Search by Category Name or Slug
+  if (search && search.trim() !== '') {
+    const searchRegex = new RegExp(search.trim(), 'i');
+    filter.$or = [{ name: searchRegex }, { slug: searchRegex }];
+  }
+
+  // Calculate metadata counts across full dataset
+  const [total, activeCount, inactiveCount] = await Promise.all([
+    Category.countDocuments({}),
+    Category.countDocuments({ isActive: true }),
+    Category.countDocuments({ isActive: false }),
+  ]);
+
+  // Fetch matching categories sorted alphabetically by name
   const categories = await Category.find(filter).sort({ name: 1 });
 
   res.status(200).json({
     success: true,
     count: categories.length,
+    total,
+    activeCount,
+    inactiveCount,
     data: categories,
   });
 });
@@ -49,33 +76,42 @@ export const getCategoryById = asyncHandler(async (req, res) => {
 /**
  * @desc    Create a new category
  * @route   POST /api/categories
- * @access  Public (Admin)
+ * @access  Private (Admin)
  */
 export const createCategory = asyncHandler(async (req, res) => {
   const { name, slug, icon, description, isActive } = req.body;
 
-  if (!name || !slug) {
+  if (!name || !name.trim()) {
     res.status(400);
-    throw new Error('Category name and slug are required');
+    throw new Error('Category name is required');
   }
 
+  if (!slug || !slug.trim()) {
+    res.status(400);
+    throw new Error('Category slug is required');
+  }
+
+  const cleanName = name.trim();
   const cleanSlug = slug.toLowerCase().trim();
 
   // Prevent duplicate category name or slug
   const existingCategory = await Category.findOne({
-    $or: [{ name: name.trim() }, { slug: cleanSlug }],
+    $or: [
+      { name: { $regex: new RegExp(`^${cleanName}$`, 'i') } },
+      { slug: cleanSlug },
+    ],
   });
 
   if (existingCategory) {
     res.status(400);
-    throw new Error(`Category with name '${name}' or slug '${slug}' already exists`);
+    throw new Error(`Category with name '${cleanName}' or slug '${cleanSlug}' already exists`);
   }
 
   const category = await Category.create({
-    name: name.trim(),
+    name: cleanName,
     slug: cleanSlug,
-    icon: icon || 'Tag',
-    description: description || '',
+    icon: icon ? icon.trim() : 'Tag',
+    description: description ? description.trim() : '',
     isActive: isActive !== undefined ? isActive : true,
   });
 
@@ -86,9 +122,9 @@ export const createCategory = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Update category
+ * @desc    Update category fields
  * @route   PUT /api/categories/:id
- * @access  Public (Admin)
+ * @access  Private (Admin)
  */
 export const updateCategory = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -104,19 +140,38 @@ export const updateCategory = asyncHandler(async (req, res) => {
     throw new Error('Category not found');
   }
 
-  // Check duplicate slug if slug is changed
-  if (slug && slug.toLowerCase() !== category.slug) {
-    const slugExists = await Category.findOne({ slug: slug.toLowerCase() });
-    if (slugExists) {
-      res.status(400);
-      throw new Error(`Category slug '${slug}' is already in use`);
-    }
-    category.slug = slug.toLowerCase();
+  // Prevent modifying _id
+  if (req.body._id && req.body._id.toString() !== category._id.toString()) {
+    res.status(400);
+    throw new Error('Cannot modify category ID');
   }
 
-  if (name) category.name = name.trim();
-  if (icon !== undefined) category.icon = icon;
-  if (description !== undefined) category.description = description;
+  // Check duplicate slug if slug is changed
+  if (slug && slug.toLowerCase().trim() !== category.slug) {
+    const cleanSlug = slug.toLowerCase().trim();
+    const slugExists = await Category.findOne({ slug: cleanSlug });
+    if (slugExists) {
+      res.status(400);
+      throw new Error(`Category slug '${cleanSlug}' is already in use`);
+    }
+    category.slug = cleanSlug;
+  }
+
+  // Check duplicate name if name is changed
+  if (name && name.trim().toLowerCase() !== category.name.toLowerCase()) {
+    const cleanName = name.trim();
+    const nameExists = await Category.findOne({
+      name: { $regex: new RegExp(`^${cleanName}$`, 'i') },
+    });
+    if (nameExists) {
+      res.status(400);
+      throw new Error(`Category name '${cleanName}' is already in use`);
+    }
+    category.name = cleanName;
+  }
+
+  if (icon !== undefined) category.icon = icon.trim();
+  if (description !== undefined) category.description = description.trim();
   if (isActive !== undefined) category.isActive = isActive;
 
   const updatedCategory = await category.save();
@@ -128,9 +183,42 @@ export const updateCategory = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Delete category (Protected against products assigned)
+ * @desc    Toggle category active/inactive status
+ * @route   PATCH /api/categories/:id/status
+ * @access  Private (Admin)
+ */
+export const toggleCategoryStatus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { isActive } = req.body;
+
+  if (isActive === undefined) {
+    res.status(400);
+    throw new Error('Please provide isActive status boolean');
+  }
+
+  const isObjectId = mongoose.Types.ObjectId.isValid(id);
+  const category = isObjectId
+    ? await Category.findById(id)
+    : await Category.findOne({ slug: id.toLowerCase() });
+
+  if (!category) {
+    res.status(404);
+    throw new Error('Category not found');
+  }
+
+  category.isActive = Boolean(isActive);
+  const updatedCategory = await category.save();
+
+  res.status(200).json({
+    success: true,
+    data: updatedCategory,
+  });
+});
+
+/**
+ * @desc    Delete category (Data integrity check against referenced products)
  * @route   DELETE /api/categories/:id
- * @access  Public (Admin)
+ * @access  Private (Admin)
  */
 export const deleteCategory = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -145,12 +233,12 @@ export const deleteCategory = asyncHandler(async (req, res) => {
     throw new Error('Category not found');
   }
 
-  // Check whether any Product references this category
+  // Data Integrity Check: Verify if any Product references this category
   const productCount = await Product.countDocuments({ category: category._id });
 
   if (productCount > 0) {
-    res.status(400);
-    throw new Error(`Cannot delete category: ${productCount} products are assigned to it`);
+    res.status(409); // HTTP 409 Conflict
+    throw new Error('Cannot delete this category because products are using it. Deactivate the category instead.');
   }
 
   await category.deleteOne();
