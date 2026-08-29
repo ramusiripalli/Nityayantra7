@@ -10,21 +10,24 @@ const api = axios.create({
   timeout: 10000,
 });
 
-// Request Interceptor
+// Request Interceptor: Attach Admin JWT Token if available
 api.interceptors.request.use(
   (config) => {
-    // Future authentication token attached here
+    const token = localStorage.getItem('adminToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor
+// Response Interceptor: Extract data or reject with structured error
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    console.error('API Service Error:', error?.response?.data || error.message);
-    return Promise.reject(error);
+    const errorMessage = error?.response?.data?.message || error.message || 'An unexpected error occurred';
+    return Promise.reject(new Error(errorMessage));
   }
 );
 
