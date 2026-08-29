@@ -268,14 +268,14 @@ export const HeroSection = ({ featuredProduct }) => {
         </div>
 
         {/* GRADIENT STATISTICS STRIP (Bottom Pill Bar) */}
-        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 rounded-3xl p-5 sm:p-6 shadow-xl text-white">
+        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 rounded-3xl p-4 sm:p-2 shadow-xl text-white">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 text-center">
             
             <div className="flex flex-col items-center space-y-1">
               <div className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
                 <Users className="w-4 h-4" />
               </div>
-              <span className="text-2xl font-black tracking-tight">100K+</span>
+              <span className="text-2xl font-black tracking-tight">100+</span>
               <span className="text-[11px] font-semibold text-sky-100">Happy Users</span>
             </div>
 
@@ -283,7 +283,7 @@ export const HeroSection = ({ featuredProduct }) => {
               <div className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
                 <Package className="w-4 h-4" />
               </div>
-              <span className="text-2xl font-black tracking-tight">500K+</span>
+              <span className="text-2xl font-black tracking-tight">50+</span>
               <span className="text-[11px] font-semibold text-sky-100">Products Listed</span>
             </div>
 
@@ -291,7 +291,7 @@ export const HeroSection = ({ featuredProduct }) => {
               <div className="w-9 h-9 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
                 <PlayCircle className="w-4 h-4" />
               </div>
-              <span className="text-2xl font-black tracking-tight">10K+</span>
+              <span className="text-2xl font-black tracking-tight">100+</span>
               <span className="text-[11px] font-semibold text-sky-100">Video Reviews</span>
             </div>
 
