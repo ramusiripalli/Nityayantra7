@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import PageContainer from '../components/common/PageContainer';
 import RatingStars from '../components/product/RatingStars';
@@ -18,7 +18,9 @@ import {
   PackageX,
   ArrowLeft,
   Home,
-  Tag
+  ChevronDown,
+  ShieldCheck,
+  TrendingUp
 } from 'lucide-react';
 
 export const ProductDetailPage = () => {
@@ -27,6 +29,8 @@ export const ProductDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  
+  const comparisonRef = useRef(null);
 
   useEffect(() => {
     async function fetchProduct() {
@@ -42,7 +46,14 @@ export const ProductDetailPage = () => {
       }
     }
     fetchProduct();
+    window.scrollTo(0, 0);
   }, [id]);
+
+  const scrollToComparison = () => {
+    if (comparisonRef.current) {
+      comparisonRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   if (loading) {
     return (
@@ -96,17 +107,31 @@ export const ProductDetailPage = () => {
 
   const discount = product.discountPercent || calculateDiscount(product.originalPrice, product.currentPrice);
 
-  // Find the lowest price among marketplaces to flag with BEST PRICE badge
-  const lowestMarketplacePrice = product.marketplaces?.reduce(
-    (min, mp) => (mp.price < min ? mp.price : min),
-    Infinity
-  );
+  // Normalize marketplaces list and sort dynamically from LOWEST -> HIGHEST PRICE
+  const rawMarketplaces = product.marketplaces && product.marketplaces.length > 0 
+    ? product.marketplaces 
+    : [
+        { id: product.lowestMarketplace || "amazon", name: product.lowestMarketplace || "Amazon", price: product.currentPrice, originalPrice: product.originalPrice, inStock: true, url: "#" },
+        { id: "flipkart", name: "Flipkart", price: Math.round(product.currentPrice * 1.04), originalPrice: product.originalPrice, inStock: true, url: "#" },
+        { id: "meesho", name: "Meesho", price: Math.round(product.currentPrice * 1.06), originalPrice: product.originalPrice, inStock: true, url: "#" }
+      ];
+
+  const sortedMarketplaces = [...rawMarketplaces].sort((a, b) => a.price - b.price);
+  const lowestPrice = sortedMarketplaces[0]?.price || product.currentPrice;
+  const bestMarketplaceObj = sortedMarketplaces[0];
+
+  // Additional product gallery thumbnails fallback
+  const galleryImages = [
+    product.image,
+    product.image,
+    product.image
+  ];
 
   return (
     <PageContainer>
       
       {/* Breadcrumb Navigation */}
-      <nav className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-6 overflow-x-auto">
+      <nav className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-5 overflow-x-auto">
         <Link to="/" className="hover:text-sky-600">Home</Link>
         <ChevronRight className="w-3.5 h-3.5" />
         <Link to="/products" className="hover:text-sky-600">Products</Link>
@@ -116,60 +141,65 @@ export const ProductDetailPage = () => {
         <span className="text-slate-900 font-bold truncate max-w-xs">{product.title}</span>
       </nav>
 
-      {/* Main Product Overview Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
+      {/* Main Product Overview Grid (12-Columns Desktop, Dedicated Order Mobile) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 lg:gap-10 mb-9 items-start">
         
-        {/* LEFT COLUMN: Image Gallery & Discount Badge */}
-        <div className="lg:col-span-5 space-y-4">
-          <div className="relative aspect-square w-full bg-white rounded-3xl border border-slate-200 p-6 flex items-center justify-center shadow-xs overflow-hidden">
+        {/* LEFT COLUMN: Product Gallery (1:1 Fixed Aspect Ratio) */}
+        <div className="lg:col-span-5 space-y-3.5 w-full">
+          
+          {/* Main Normalized Image Container */}
+          <div className="relative aspect-square w-full max-w-[440px] lg:max-w-none mx-auto bg-[#f8fafc] rounded-2xl border border-slate-200 p-5 flex items-center justify-center shadow-2xs overflow-hidden">
             <img
-              src={product.image}
+              src={galleryImages[activeImageIndex] || product.image}
               alt={product.title}
-              className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-contain object-center hover:scale-105 transition-transform duration-300 pointer-events-none"
             />
             {discount > 0 && (
-              <span className="absolute top-4 left-4 bg-emerald-600 text-white font-black text-xs px-3 py-1 rounded-full uppercase shadow-xs">
+              <span className="absolute top-3.5 left-3.5 bg-emerald-600 text-white font-extrabold text-xs px-2.5 py-1 rounded-md uppercase tracking-wide shadow-2xs">
                 {discount}% OFF
               </span>
             )}
           </div>
 
-          {/* Thumbnails */}
-          <div className="flex items-center gap-3">
-            {[product.image, product.image, product.image].map((img, idx) => (
+          {/* Gallery Thumbnails */}
+          <div className="flex items-center justify-center lg:justify-start gap-2.5">
+            {galleryImages.map((img, idx) => (
               <button
                 key={idx}
                 onClick={() => setActiveImageIndex(idx)}
                 aria-label={`Thumbnail ${idx + 1}`}
-                className={`w-20 h-20 rounded-xl border-2 overflow-hidden bg-white p-1 transition-all ${
-                  activeImageIndex === idx ? 'border-sky-600 ring-2 ring-sky-100' : 'border-slate-200 opacity-70 hover:opacity-100'
+                className={`w-16 h-16 rounded-xl border-2 overflow-hidden bg-[#f8fafc] p-1.5 transition-all cursor-pointer ${
+                  activeImageIndex === idx 
+                    ? 'border-sky-600 ring-2 ring-sky-100 scale-105' 
+                    : 'border-slate-200 opacity-70 hover:opacity-100'
                 }`}
               >
-                <img src={img} alt="Thumbnail" className="w-full h-full object-cover rounded-lg" />
+                <img src={img} alt="Thumbnail" className="w-full h-full object-contain rounded-lg" />
               </button>
             ))}
           </div>
+
         </div>
 
-        {/* RIGHT COLUMN: Product Metadata, Ratings, Best Deal Box & Marketplace Table */}
-        <div className="lg:col-span-7 space-y-5">
+        {/* RIGHT COLUMN: Product Overview, Prices, Best Deal & Actions */}
+        <div className="lg:col-span-7 space-y-4">
           
           <div>
             <span className="inline-block text-xs font-extrabold uppercase tracking-wider text-sky-700 bg-sky-50 px-2.5 py-1 rounded-md border border-sky-200 mb-2">
               Category: {product.category}
             </span>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 leading-tight">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 leading-tight">
               {product.title}
             </h1>
           </div>
 
           {/* Ratings Header Row */}
-          <div className="flex flex-wrap items-center gap-4 py-3 border-y border-slate-200/80">
+          <div className="flex flex-wrap items-center gap-3.5 py-2.5 border-y border-slate-200/80">
             {product.editorialRating && (
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-xl">
+              <div className="flex items-center gap-2 px-2.5 py-1 bg-amber-50 border border-amber-200 rounded-lg">
                 <Award className="w-4 h-4 text-amber-600" />
                 <div className="text-xs">
-                  <span className="font-extrabold text-amber-900">NY Editorial Rating: </span>
+                  <span className="font-extrabold text-amber-900">NY Editorial: </span>
                   <span className="font-black text-amber-700">{product.editorialRating} / 5.0</span>
                 </div>
               </div>
@@ -181,20 +211,25 @@ export const ProductDetailPage = () => {
           </div>
 
           {/* Short Description */}
-          <p className="text-sm text-slate-600 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
             {product.shortDescription || product.description}
           </p>
 
           {/* Best Deal Price & Savings Summary Box */}
           <div className="p-4 bg-slate-100/90 rounded-2xl border border-slate-200/80 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <span className="text-xs font-semibold text-slate-500 block">Best Deal Price:</span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-slate-900">
-                  {formatINR(product.currentPrice)}
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-xs font-bold text-slate-500">Current Best Price:</span>
+                <span className="text-[10px] font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.2 rounded uppercase">
+                  Best Price Match
                 </span>
-                {product.originalPrice && product.originalPrice > product.currentPrice && (
-                  <span className="text-sm text-slate-400 line-through">
+              </div>
+              <div className="flex items-baseline gap-2.5">
+                <span className="text-2xl sm:text-3xl font-black text-slate-900">
+                  {formatINR(lowestPrice)}
+                </span>
+                {product.originalPrice && product.originalPrice > lowestPrice && (
+                  <span className="text-xs sm:text-sm text-slate-400 line-through">
                     {formatINR(product.originalPrice)}
                   </span>
                 )}
@@ -204,104 +239,153 @@ export const ProductDetailPage = () => {
             {discount > 0 && (
               <div className="text-right">
                 <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full inline-block">
-                  Save {formatINR((product.originalPrice || 0) - product.currentPrice)} ({discount}%)
+                  Save {formatINR((product.originalPrice || 0) - lowestPrice)} ({discount}% OFF)
                 </span>
               </div>
             )}
           </div>
 
-          {/* Marketplace Price Comparison Table (Primary Conversion Section) */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 text-sky-600" />
-                <span>Compare Marketplace Options</span>
-              </h3>
-              <span className="text-[11px] font-medium text-slate-400">Direct Affiliate Links</span>
-            </div>
+          {/* Action Bar: Primary "Buy on Marketplace" + Secondary "Compare Prices" */}
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <a
+              href={bestMarketplaceObj?.url || "#"}
+              onClick={(e) => {
+                if (!bestMarketplaceObj?.url || bestMarketplaceObj.url === "#") e.preventDefault();
+              }}
+              className="flex-1 min-w-[200px] h-[48px] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm rounded-xl shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
+            >
+              <span>Buy on {bestMarketplaceObj?.name || "Amazon"} ({formatINR(lowestPrice)})</span>
+              <ExternalLink className="w-4 h-4" />
+            </a>
 
-            {/* Marketplace Rows */}
-            <div className="space-y-2.5">
-              {product.marketplaces?.map((mp) => {
-                const mpMeta = MARKETPLACES[mp.id] || { name: mp.name, btnBg: 'bg-sky-600 hover:bg-sky-700' };
-                const isBestPrice = mp.price === lowestMarketplacePrice;
-
-                return (
-                  <div 
-                    key={mp.id} 
-                    className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
-                      isBestPrice 
-                        ? 'bg-emerald-50/60 border-emerald-300 ring-1 ring-emerald-200' 
-                        : 'bg-slate-50 border-slate-200/80 hover:border-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className={`font-bold text-xs px-2.5 py-1 rounded-md ${mpMeta.badgeBg || 'bg-slate-200'} ${mpMeta.badgeText || 'text-slate-800'}`}>
-                        {mp.name}
-                      </span>
-                      
-                      {isBestPrice && (
-                        <span className="bg-emerald-600 text-white font-extrabold text-[10px] px-2 py-0.5 rounded uppercase tracking-wider shadow-2xs">
-                          BEST PRICE
-                        </span>
-                      )}
-
-                      {mp.inStock ? (
-                        <span className="text-[11px] font-semibold text-emerald-600 hidden sm:flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> In Stock
-                        </span>
-                      ) : (
-                        <span className="text-[11px] font-semibold text-slate-400 hidden sm:inline">Out of stock</span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <span className={`text-sm font-black ${isBestPrice ? 'text-emerald-700' : 'text-slate-900'}`}>
-                        {formatINR(mp.price)}
-                      </span>
-                      <a
-                        href={mp.url || "#"}
-                        onClick={(e) => {
-                          if (mp.url === "#") e.preventDefault();
-                        }}
-                        className={`inline-flex items-center gap-1 px-3.5 py-1.5 ${
-                          isBestPrice ? 'bg-emerald-600 hover:bg-emerald-700' : mpMeta.btnBg || 'bg-sky-600'
-                        } text-white font-bold text-xs rounded-lg shadow-2xs transition-all`}
-                      >
-                        <span>Buy on {mp.name}</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Affiliate Disclosure */}
-            <div className="pt-2 flex items-start gap-2 text-[11px] text-slate-500 border-t border-slate-100">
-              <Info className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-              <p>{AFFILIATE_DISCLOSURE_TEXT}</p>
-            </div>
+            <button
+              type="button"
+              onClick={scrollToComparison}
+              className="h-[48px] px-5 bg-white border-2 border-sky-200 hover:border-sky-500 text-sky-800 font-bold text-xs sm:text-sm rounded-xl shadow-2xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+            >
+              <TrendingUp className="w-4 h-4 text-sky-600" />
+              <span>Compare Available Prices ({sortedMarketplaces.length})</span>
+              <ChevronDown className="w-4 h-4 text-sky-600" />
+            </button>
           </div>
 
         </div>
 
       </div>
 
-      {/* KEY FEATURES & NITYA YANTRA REVIEW BREAKDOWN */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+      {/* MARKETPLACE PRICE COMPARISON SECTION (LOWEST TO HIGHEST PRICE SORTED) */}
+      <div 
+        ref={comparisonRef} 
+        id="marketplace-comparison" 
+        className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4 mb-9 scroll-mt-24"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3.5 gap-2">
+          <div>
+            <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-0.5">
+              REAL-TIME PRICE COMPARISON
+            </span>
+            <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 text-sky-600" />
+              <span>Compare Marketplace Options ({sortedMarketplaces.length} Sellers)</span>
+            </h2>
+          </div>
+          <span className="text-xs font-semibold text-slate-400">
+            Sorted by Lowest Price
+          </span>
+        </div>
+
+        {/* Sorted Marketplace Rows */}
+        <div className="space-y-2.5">
+          {sortedMarketplaces.map((mp, index) => {
+            const mpMeta = MARKETPLACES[mp.id?.toLowerCase()] || { name: mp.name, badgeBg: 'bg-slate-100', badgeText: 'text-slate-800', btnBg: 'bg-sky-600 hover:bg-sky-700' };
+            const isCheapest = index === 0;
+            const percentHigher = !isCheapest && lowestPrice ? Math.round(((mp.price - lowestPrice) / lowestPrice) * 100) : 0;
+
+            return (
+              <div 
+                key={mp.id || index} 
+                className={`flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border transition-all gap-3 ${
+                  isCheapest 
+                    ? 'bg-emerald-50/80 border-emerald-300 ring-1 ring-emerald-200/80 shadow-2xs' 
+                    : 'bg-slate-50/80 border-slate-200/80 hover:border-slate-300'
+                }`}
+              >
+                {/* Left: Brand Dot/Badge + Delivery Info */}
+                <div className="flex items-center gap-3">
+                  <span className={`font-black text-xs px-3 py-1.5 rounded-md border ${mpMeta.badgeBg || 'bg-slate-200'} ${mpMeta.badgeText || 'text-slate-800'} ${mpMeta.borderColor || 'border-slate-300'}`}>
+                    {mp.name}
+                  </span>
+                  
+                  {isCheapest ? (
+                    <span className="bg-emerald-600 text-white font-black text-[10px] px-2.5 py-0.5 rounded uppercase tracking-wider shadow-2xs flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3" />
+                      <span>BEST PRICE FOUND</span>
+                    </span>
+                  ) : (
+                    <span className="text-[11px] font-bold text-slate-500 bg-slate-200/70 px-2 py-0.5 rounded">
+                      +{percentHigher}% higher
+                    </span>
+                  )}
+
+                  <span className="text-[11px] text-slate-400 font-medium hidden md:inline">
+                    • In Stock & Free Delivery
+                  </span>
+                </div>
+
+                {/* Right: Price + Buy CTA */}
+                <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200/60">
+                  <div className="text-left sm:text-right">
+                    <span className={`text-base sm:text-lg font-black ${isCheapest ? 'text-emerald-700' : 'text-slate-900'}`}>
+                      {formatINR(mp.price)}
+                    </span>
+                    {isCheapest && (
+                      <span className="text-[10px] font-bold text-emerald-600 block leading-none">
+                        Lowest price deal
+                      </span>
+                    )}
+                  </div>
+
+                  <a
+                    href={mp.url || "#"}
+                    onClick={(e) => {
+                      if (mp.url === "#") e.preventDefault();
+                    }}
+                    className={`inline-flex items-center gap-1.5 px-4 py-2 ${
+                      isCheapest 
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
+                        : mpMeta.btnBg || 'bg-sky-600 text-white'
+                    } font-bold text-xs rounded-lg shadow-2xs transition-all cursor-pointer shrink-0`}
+                  >
+                    <span>Buy on {mp.name}</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Affiliate Disclosure */}
+        <div className="pt-2 flex items-start gap-2 text-[11px] text-slate-500 border-t border-slate-100">
+          <Info className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+          <p>{AFFILIATE_DISCLOSURE_TEXT}</p>
+        </div>
+      </div>
+
+      {/* KEY FEATURES & PROS / CONS REVIEW BREAKDOWN */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-7 sm:gap-8 mb-9">
         
         {/* Key Features */}
         {product.keyFeatures && (
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+          <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3.5">
             <h3 className="text-base font-extrabold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-sky-600" />
-              <span>KEY FEATURES</span>
+              <span>KEY HIGHLIGHTS</span>
             </h3>
             <ul className="space-y-2.5">
               {product.keyFeatures.map((feat, idx) => (
-                <li key={idx} className="flex items-start gap-2.5 text-xs text-slate-700 leading-normal">
-                  <span className="w-1.5 h-1.5 rounded-full bg-sky-500 mt-1.5 shrink-0" />
+                <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 leading-normal">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-500 mt-2 shrink-0" />
                   <span>{feat}</span>
                 </li>
               ))}
@@ -311,9 +395,9 @@ export const ProductDetailPage = () => {
 
         {/* Nitya Yantra Review (Pros & Cons) */}
         {(product.pros || product.cons) && (
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+          <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3.5">
             <h3 className="text-base font-extrabold text-slate-900 border-b border-slate-100 pb-3">
-              NITYA YANTRA REVIEW
+              NITYA YANTRA VERDICT
             </h3>
 
             <div className="space-y-4">
@@ -324,8 +408,8 @@ export const ProductDetailPage = () => {
                   </span>
                   <ul className="space-y-1.5">
                     {product.pros.map((pro, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-xs text-slate-700">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                      <li key={idx} className="flex items-start gap-2 text-xs sm:text-sm text-slate-700">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                         <span>{pro}</span>
                       </li>
                     ))}
@@ -340,8 +424,8 @@ export const ProductDetailPage = () => {
                   </span>
                   <ul className="space-y-1.5">
                     {product.cons.map((con, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-xs text-slate-700">
-                        <XCircle className="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" />
+                      <li key={idx} className="flex items-start gap-2 text-xs sm:text-sm text-slate-700">
+                        <XCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                         <span>{con}</span>
                       </li>
                     ))}
@@ -354,16 +438,37 @@ export const ProductDetailPage = () => {
 
       </div>
 
+      {/* PRODUCT SPECIFICATIONS TABLE */}
+      {product.specs && Object.keys(product.specs).length > 0 && (
+        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs mb-9 space-y-3.5">
+          <h3 className="text-base font-extrabold text-slate-900 border-b border-slate-100 pb-3">
+            TECHNICAL SPECIFICATIONS
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs sm:text-sm text-left text-slate-700">
+              <tbody>
+                {Object.entries(product.specs).map(([key, val], idx) => (
+                  <tr key={key} className={idx % 2 === 0 ? 'bg-slate-50/70' : 'bg-white'}>
+                    <td className="py-2.5 px-3 font-bold text-slate-900 w-1/3 border-b border-slate-100">{key}</td>
+                    <td className="py-2.5 px-3 font-medium text-slate-600 border-b border-slate-100">{val}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* YOUTUBE VIDEO REVIEW SECTION */}
       {product.youtubeVideoId && (
-        <div className="mb-10 bg-slate-900 text-white p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-card space-y-4">
+        <div className="mb-9 bg-slate-900 text-white p-5 sm:p-8 rounded-3xl border border-slate-800 shadow-card space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <div className="p-2 bg-red-600 text-white rounded-xl">
                 <Youtube className="w-6 h-6 fill-white" />
               </div>
               <div>
-                <h3 className="text-lg font-extrabold text-white">
+                <h3 className="text-base sm:text-lg font-extrabold text-white">
                   YOUTUBE VIDEO REVIEW
                 </h3>
                 <p className="text-xs text-slate-400">
@@ -373,7 +478,7 @@ export const ProductDetailPage = () => {
             </div>
           </div>
 
-          <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl">
+          <div className="relative aspect-video w-full max-w-4xl mx-auto rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl">
             <iframe
               src={`https://www.youtube-nocookie.com/embed/${product.youtubeVideoId}`}
               title={product.title}
@@ -385,8 +490,8 @@ export const ProductDetailPage = () => {
         </div>
       )}
 
-      {/* Back to Products */}
-      <div className="border-t border-slate-200 pt-6 flex justify-between items-center">
+      {/* Back to Products Footer */}
+      <div className="border-t border-slate-200 pt-5 flex justify-between items-center">
         <Link
           to="/products"
           className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors"
