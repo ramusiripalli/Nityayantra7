@@ -7,21 +7,22 @@ import {
   deleteCategory,
   getCategoryProducts
 } from '../controllers/categoryController.js';
+import { protect, requireAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Base Category Endpoints
+// Base Category Endpoints (GET is Public, POST requires Admin)
 router.route('/')
   .get(getCategories)
-  .post(createCategory);
+  .post(protect, requireAdmin, createCategory);
 
-// Single Category Endpoints
+// Single Category Endpoints (GET is Public, PUT/DELETE require Admin)
 router.route('/:id')
   .get(getCategoryById)
-  .put(updateCategory)
-  .delete(deleteCategory);
+  .put(protect, requireAdmin, updateCategory)
+  .delete(protect, requireAdmin, deleteCategory);
 
-// Category Products Catalogue Endpoint
+// Category Products Catalogue Endpoint (Public)
 router.route('/:slug/products')
   .get(getCategoryProducts);
 

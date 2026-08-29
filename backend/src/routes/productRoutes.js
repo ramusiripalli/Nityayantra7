@@ -6,18 +6,19 @@ import {
   updateProduct,
   deleteProduct
 } from '../controllers/productController.js';
+import { protect, requireAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Base Product Endpoints (List & Create)
+// Base Product Endpoints (GET is Public, POST requires Admin)
 router.route('/')
   .get(getProducts)
-  .post(createProduct);
+  .post(protect, requireAdmin, createProduct);
 
-// Single Product Endpoints (Get, Update & Delete)
+// Single Product Endpoints (GET is Public, PUT/DELETE require Admin)
 router.route('/:id')
   .get(getProductById)
-  .put(updateProduct)
-  .delete(deleteProduct);
+  .put(protect, requireAdmin, updateProduct)
+  .delete(protect, requireAdmin, deleteProduct);
 
 export default router;
