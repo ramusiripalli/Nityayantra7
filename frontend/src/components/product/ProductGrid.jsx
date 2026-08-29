@@ -5,9 +5,9 @@ import { PackageX } from 'lucide-react';
 export const ProductGrid = ({ products = [], isLoading = false, emptyMessage = "No products found matching your search." }) => {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {[1, 2, 3, 4, 5, 6].map((idx) => (
-          <div key={idx} className="h-80 bg-slate-100 animate-pulse rounded-2xl border border-slate-200" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+        {[1, 2, 3, 4, 5].map((idx) => (
+          <div key={idx} className="h-64 bg-slate-100 animate-pulse rounded-xl border border-slate-200" />
         ))}
       </div>
     );
@@ -26,7 +26,7 @@ export const ProductGrid = ({ products = [], isLoading = false, emptyMessage = "
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 items-stretch">
       {products.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
