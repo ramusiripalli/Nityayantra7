@@ -1,12 +1,12 @@
 import { MOCK_PRODUCTS } from '../data/mockProducts';
 
 /**
- * Service abstraction for product API calls.
+ * Service abstraction for product API calls & search.
  * Uses local mock data with Promises to prepare for future Express/MongoDB backend integration.
  */
 export const productService = {
   /**
-   * Get all products with optional filtering & sorting
+   * Get all products with multi-faceted filtering & sorting
    */
   async getProducts(params = {}) {
     return new Promise((resolve) => {
@@ -35,6 +35,30 @@ export const productService = {
         );
       }
 
+      // Min/Max Price Filtering
+      if (params.minPrice !== undefined && params.minPrice !== null && params.minPrice !== '') {
+        filtered = filtered.filter((p) => p.currentPrice >= Number(params.minPrice));
+      }
+      if (params.maxPrice !== undefined && params.maxPrice !== null && params.maxPrice !== '') {
+        filtered = filtered.filter((p) => p.currentPrice <= Number(params.maxPrice));
+      }
+
+      // Rating Filtering
+      if (params.minRating) {
+        filtered = filtered.filter((p) => (p.rating || 0) >= Number(params.minRating));
+      }
+
+      // Marketplace Filtering
+      if (params.marketplaces && params.marketplaces.length > 0) {
+        const mps = Array.isArray(params.marketplaces) ? params.marketplaces : [params.marketplaces];
+        if (mps.length > 0) {
+          filtered = filtered.filter((p) => {
+            if (!p.lowestMarketplace) return true;
+            return mps.some((m) => m.toLowerCase() === p.lowestMarketplace.toLowerCase());
+          });
+        }
+      }
+
       // Sorting
       if (params.sortBy) {
         if (params.sortBy === 'price_low') {
@@ -51,6 +75,51 @@ export const productService = {
       }
 
       setTimeout(() => resolve(filtered), 50);
+    });
+  },
+
+  /**
+   * Autocomplete suggestions helper
+   */
+  async autocompleteProducts(query = '') {
+    return new Promise((resolve) => {
+      if (!query.trim()) {
+        resolve({ textSuggestions: [], productPreviews: [] });
+        return;
+      }
+
+      const q = query.toLowerCase().trim();
+
+      // Matching Products (up to 4)
+      const matchingProducts = MOCK_PRODUCTS.filter(
+        (p) =>
+          p.title?.toLowerCase().includes(q) ||
+          p.category?.toLowerCase().includes(q) ||
+          p.shortDescription?.toLowerCase().includes(q)
+      ).slice(0, 4);
+
+      // Generate realistic text search suggestions
+      const textSuggestions = [];
+      
+      // Category match
+      const matchedCategory = MOCK_PRODUCTS.find((p) => p.category?.toLowerCase().includes(q));
+      if (matchedCategory) {
+        textSuggestions.push(`${query} in ${matchedCategory.category}`);
+      }
+
+      textSuggestions.push(`${query}`);
+      textSuggestions.push(`${query} under ₹5000`);
+      textSuggestions.push(`best ${query} deals`);
+
+      // Deduplicate
+      const uniqueText = [...new Set(textSuggestions)].slice(0, 4);
+
+      setTimeout(() => {
+        resolve({
+          textSuggestions: uniqueText,
+          productPreviews: matchingProducts,
+        });
+      }, 30);
     });
   },
 
@@ -91,3 +160,5 @@ export const productService = {
     });
   }
 };
+
+export default productService;

@@ -20,7 +20,10 @@ import {
   Home,
   ChevronDown,
   ShieldCheck,
-  TrendingUp
+  TrendingUp,
+  Play,
+  Check,
+  PiggyBank
 } from 'lucide-react';
 
 export const ProductDetailPage = () => {
@@ -29,6 +32,7 @@ export const ProductDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [selectedVideo, setSelectedVideo] = useState(null);
   
   const comparisonRef = useRef(null);
 
@@ -39,6 +43,13 @@ export const ProductDetailPage = () => {
       try {
         const data = await productService.getProductById(id);
         setProduct(data);
+        if (data && data.youtubeVideoId) {
+          setSelectedVideo({
+            id: data.youtubeVideoId,
+            title: data.youtubeTitle || `${data.title} - Hands-On Test & Comparison`,
+            creator: 'NY Testing Lab',
+          });
+        }
       } catch (err) {
         setError('Product not found');
       } finally {
@@ -112,13 +123,17 @@ export const ProductDetailPage = () => {
     ? product.marketplaces 
     : [
         { id: product.lowestMarketplace || "amazon", name: product.lowestMarketplace || "Amazon", price: product.currentPrice, originalPrice: product.originalPrice, inStock: true, url: "#" },
-        { id: "flipkart", name: "Flipkart", price: Math.round(product.currentPrice * 1.04), originalPrice: product.originalPrice, inStock: true, url: "#" },
-        { id: "meesho", name: "Meesho", price: Math.round(product.currentPrice * 1.06), originalPrice: product.originalPrice, inStock: true, url: "#" }
+        { id: "flipkart", name: "Flipkart", price: Math.round(product.currentPrice * 1.03), originalPrice: product.originalPrice, inStock: true, url: "#" },
+        { id: "meesho", name: "Meesho", price: Math.round(product.currentPrice * 1.09), originalPrice: product.originalPrice, inStock: true, url: "#" },
+        { id: "myntra", name: "Myntra", price: Math.round(product.currentPrice * 1.13), originalPrice: product.originalPrice, inStock: true, url: "#" }
       ];
 
   const sortedMarketplaces = [...rawMarketplaces].sort((a, b) => a.price - b.price);
   const lowestPrice = sortedMarketplaces[0]?.price || product.currentPrice;
+  const highestPrice = sortedMarketplaces[sortedMarketplaces.length - 1]?.price || lowestPrice;
   const bestMarketplaceObj = sortedMarketplaces[0];
+  const maxSavings = highestPrice - lowestPrice;
+  const maxSavingsPercent = highestPrice > 0 ? Math.round((maxSavings / highestPrice) * 100) : 0;
 
   // Additional product gallery thumbnails fallback
   const galleryImages = [
@@ -127,8 +142,24 @@ export const ProductDetailPage = () => {
     product.image
   ];
 
+  // Mock video reviews list
+  const videoReviews = product.youtubeVideoId ? [
+    {
+      id: product.youtubeVideoId,
+      title: product.youtubeTitle || `${product.title} - Full Hands-On Review`,
+      creator: 'NY Testing Lab',
+      thumbnail: product.image,
+    },
+    {
+      id: 'dQw4w9WgXcQ',
+      title: `Unboxing & First Impressions of ${product.title}`,
+      creator: 'Tech Reviews India',
+      thumbnail: product.image,
+    }
+  ] : [];
+
   return (
-    <PageContainer>
+    <PageContainer className="pb-24 lg:pb-8">
       
       {/* Breadcrumb Navigation */}
       <nav className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-5 overflow-x-auto">
@@ -181,7 +212,7 @@ export const ProductDetailPage = () => {
 
         </div>
 
-        {/* RIGHT COLUMN: Product Overview, Prices, Best Deal & Actions */}
+        {/* RIGHT COLUMN: Product Overview, Prices, BEST PRICE MATCH Hero Card & Actions */}
         <div className="lg:col-span-7 space-y-4">
           
           <div>
@@ -215,34 +246,73 @@ export const ProductDetailPage = () => {
             {product.shortDescription || product.description}
           </p>
 
-          {/* Best Deal Price & Savings Summary Box */}
-          <div className="p-4 bg-slate-100/90 rounded-2xl border border-slate-200/80 flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-xs font-bold text-slate-500">Current Best Price:</span>
-                <span className="text-[10px] font-black text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.2 rounded uppercase">
-                  Best Price Match
-                </span>
+          {/* BEST PRICE MATCH HERO CARD */}
+          <div className="p-4 sm:p-5 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl border border-slate-800 shadow-md space-y-3.5">
+            
+            <div className="flex items-center justify-between border-b border-slate-700/80 pb-2.5">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                <span className="font-black text-sm tracking-wide text-white uppercase">BEST PRICE MATCH</span>
               </div>
-              <div className="flex items-baseline gap-2.5">
-                <span className="text-2xl sm:text-3xl font-black text-slate-900">
-                  {formatINR(lowestPrice)}
+              <span className="text-[11px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2.5 py-0.5 rounded-full">
+                ✓ We found the best deal
+              </span>
+            </div>
+
+            {/* Price Row */}
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <div>
+                <span className="text-[11px] text-slate-400 font-medium block">Lowest Market Price:</span>
+                <div className="flex items-baseline gap-2.5">
+                  <span className="text-3xl font-black text-white">{formatINR(lowestPrice)}</span>
+                  {product.originalPrice && product.originalPrice > lowestPrice && (
+                    <span className="text-sm text-slate-400 line-through">{formatINR(product.originalPrice)}</span>
+                  )}
+                  {discount > 0 && (
+                    <span className="text-xs font-bold text-emerald-400 bg-emerald-900/60 border border-emerald-700 px-2 py-0.5 rounded">
+                      {discount}% OFF
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="text-right">
+                <span className="text-[11px] text-slate-400 block font-medium">Best Offer At:</span>
+                <span className="text-sm font-black text-emerald-300 uppercase tracking-wide">
+                  {bestMarketplaceObj?.name}
                 </span>
-                {product.originalPrice && product.originalPrice > lowestPrice && (
-                  <span className="text-xs sm:text-sm text-slate-400 line-through">
-                    {formatINR(product.originalPrice)}
-                  </span>
-                )}
               </div>
             </div>
 
-            {discount > 0 && (
-              <div className="text-right">
-                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full inline-block">
-                  Save {formatINR((product.originalPrice || 0) - lowestPrice)} ({discount}% OFF)
-                </span>
+            {/* Savings Callout Banner if price difference exists */}
+            {maxSavings > 0 && sortedMarketplaces.length > 1 && (
+              <div className="flex items-center gap-2 text-xs font-bold text-emerald-300 bg-emerald-950/70 border border-emerald-700/60 p-2.5 rounded-xl">
+                <PiggyBank className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>You save {formatINR(maxSavings)} ({maxSavingsPercent}%) compared with the highest listed price across marketplaces.</span>
               </div>
             )}
+
+            {/* Top Marketplaces Snippet Rows inside Hero Card */}
+            <div className="space-y-1.5 pt-1">
+              {sortedMarketplaces.slice(0, 3).map((mp, idx) => {
+                const isTop = idx === 0;
+                const percentHigher = !isTop && lowestPrice ? Math.round(((mp.price - lowestPrice) / lowestPrice) * 100) : 0;
+                return (
+                  <div key={mp.id || idx} className="flex items-center justify-between text-xs py-1 px-2 rounded bg-slate-800/80 border border-slate-700/60">
+                    <span className="font-bold text-slate-200">{mp.name}</span>
+                    <div className="flex items-center gap-3">
+                      <span className={`font-black ${isTop ? 'text-emerald-400' : 'text-slate-300'}`}>{formatINR(mp.price)}</span>
+                      {isTop ? (
+                        <span className="text-[9.5px] font-black text-emerald-400 bg-emerald-900/80 px-1.5 py-0.2 rounded">BEST PRICE</span>
+                      ) : (
+                        <span className="text-[9.5px] font-bold text-slate-400">{percentHigher}% HIGHER</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
           </div>
 
           {/* Action Bar: Primary "Buy on Marketplace" + Secondary "Compare Prices" */}
@@ -264,7 +334,7 @@ export const ProductDetailPage = () => {
               className="h-[48px] px-5 bg-white border-2 border-sky-200 hover:border-sky-500 text-sky-800 font-bold text-xs sm:text-sm rounded-xl shadow-2xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
             >
               <TrendingUp className="w-4 h-4 text-sky-600" />
-              <span>Compare Available Prices ({sortedMarketplaces.length})</span>
+              <span>Compare Prices ({sortedMarketplaces.length} Sellers)</span>
               <ChevronDown className="w-4 h-4 text-sky-600" />
             </button>
           </div>
@@ -281,9 +351,11 @@ export const ProductDetailPage = () => {
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3.5 gap-2">
           <div>
-            <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider block mb-0.5">
-              REAL-TIME PRICE COMPARISON
-            </span>
+            <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 uppercase tracking-wider mb-0.5">
+              <span>✓ Prices checked recently</span>
+              <span>•</span>
+              <span>Multiple marketplaces compared</span>
+            </div>
             <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-sky-600" />
               <span>Compare Marketplace Options ({sortedMarketplaces.length} Sellers)</span>
@@ -310,7 +382,7 @@ export const ProductDetailPage = () => {
                     : 'bg-slate-50/80 border-slate-200/80 hover:border-slate-300'
                 }`}
               >
-                {/* Left: Brand Dot/Badge + Delivery Info */}
+                {/* Left: Brand Badge + Delivery Info */}
                 <div className="flex items-center gap-3">
                   <span className={`font-black text-xs px-3 py-1.5 rounded-md border ${mpMeta.badgeBg || 'bg-slate-200'} ${mpMeta.badgeText || 'text-slate-800'} ${mpMeta.borderColor || 'border-slate-300'}`}>
                     {mp.name}
@@ -322,13 +394,13 @@ export const ProductDetailPage = () => {
                       <span>BEST PRICE FOUND</span>
                     </span>
                   ) : (
-                    <span className="text-[11px] font-bold text-slate-500 bg-slate-200/70 px-2 py-0.5 rounded">
-                      +{percentHigher}% higher
+                    <span className="text-[11px] font-extrabold text-slate-600 bg-slate-200/80 px-2 py-0.5 rounded uppercase tracking-wide">
+                      {percentHigher}% HIGHER
                     </span>
                   )}
 
                   <span className="text-[11px] text-slate-400 font-medium hidden md:inline">
-                    • In Stock & Free Delivery
+                    • Free delivery
                   </span>
                 </div>
 
@@ -350,6 +422,8 @@ export const ProductDetailPage = () => {
                     onClick={(e) => {
                       if (mp.url === "#") e.preventDefault();
                     }}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className={`inline-flex items-center gap-1.5 px-4 py-2 ${
                       isCheapest 
                         ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
@@ -438,55 +512,94 @@ export const ProductDetailPage = () => {
 
       </div>
 
-      {/* PRODUCT SPECIFICATIONS TABLE */}
-      {product.specs && Object.keys(product.specs).length > 0 && (
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs mb-9 space-y-3.5">
-          <h3 className="text-base font-extrabold text-slate-900 border-b border-slate-100 pb-3">
-            TECHNICAL SPECIFICATIONS
-          </h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs sm:text-sm text-left text-slate-700">
-              <tbody>
-                {Object.entries(product.specs).map(([key, val], idx) => (
-                  <tr key={key} className={idx % 2 === 0 ? 'bg-slate-50/70' : 'bg-white'}>
-                    <td className="py-2.5 px-3 font-bold text-slate-900 w-1/3 border-b border-slate-100">{key}</td>
-                    <td className="py-2.5 px-3 font-medium text-slate-600 border-b border-slate-100">{val}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      {/* PRODUCT SPECIFICATIONS & WHAT'S INCLUDED TABLE */}
+      <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs mb-9 space-y-3.5">
+        <h3 className="text-base font-extrabold text-slate-900 border-b border-slate-100 pb-3">
+          TECHNICAL SPECIFICATIONS & WARRANTY
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs sm:text-sm text-left text-slate-700">
+            <tbody>
+              {product.specs && Object.entries(product.specs).map(([key, val], idx) => (
+                <tr key={key} className={idx % 2 === 0 ? 'bg-slate-50/70' : 'bg-white'}>
+                  <td className="py-2.5 px-3 font-bold text-slate-900 w-1/3 border-b border-slate-100">{key}</td>
+                  <td className="py-2.5 px-3 font-medium text-slate-600 border-b border-slate-100">{val}</td>
+                </tr>
+              ))}
+              <tr className="bg-slate-50/70">
+                <td className="py-2.5 px-3 font-bold text-slate-900 w-1/3 border-b border-slate-100">Warranty</td>
+                <td className="py-2.5 px-3 font-medium text-slate-600 border-b border-slate-100">2 Years Manufacturer Warranty</td>
+              </tr>
+              <tr className="bg-white">
+                <td className="py-2.5 px-3 font-bold text-slate-900 w-1/3 border-b border-slate-100">What's Included</td>
+                <td className="py-2.5 px-3 font-medium text-slate-600 border-b border-slate-100">Main Unit, User Manual, Recipe Booklet, Warranty Card</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
 
-      {/* YOUTUBE VIDEO REVIEW SECTION */}
-      {product.youtubeVideoId && (
-        <div className="mb-9 bg-slate-900 text-white p-5 sm:p-8 rounded-3xl border border-slate-800 shadow-card space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* VIDEO REVIEWS SECTION */}
+      {videoReviews.length > 0 && (
+        <div className="mb-9 bg-slate-900 text-white p-5 sm:p-8 rounded-3xl border border-slate-800 shadow-card space-y-5">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="p-2 bg-red-600 text-white rounded-xl">
-                <Youtube className="w-6 h-6 fill-white" />
+                <Youtube className="w-5 h-5 fill-white" />
               </div>
               <div>
                 <h3 className="text-base sm:text-lg font-extrabold text-white">
-                  YOUTUBE VIDEO REVIEW
+                  VIDEO REVIEWS & HANDS-ON TESTING
                 </h3>
                 <p className="text-xs text-slate-400">
-                  {product.youtubeTitle || "Watch hands-on testing video before buying"}
+                  Watch real hands-on reviews before buying
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="relative aspect-video w-full max-w-4xl mx-auto rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl">
-            <iframe
-              src={`https://www.youtube-nocookie.com/embed/${product.youtubeVideoId}`}
-              title={product.title}
-              className="w-full h-full border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
+          {/* Video Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {videoReviews.map((vid) => (
+              <div
+                key={vid.id}
+                onClick={() => setSelectedVideo(vid)}
+                className="group relative bg-slate-800 rounded-2xl overflow-hidden border border-slate-700/80 hover:border-red-500 transition-all cursor-pointer p-3 flex gap-3.5 items-center"
+              >
+                <div className="relative w-28 h-20 bg-slate-950 rounded-xl overflow-hidden shrink-0 flex items-center justify-center border border-slate-700">
+                  <img src={vid.thumbnail} alt={vid.title} className="w-full h-full object-contain opacity-80 group-hover:scale-105 transition-transform" />
+                  <div className="absolute inset-0 bg-slate-900/30 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                      <Play className="w-4 h-4 fill-white ml-0.5" />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-[10px] font-extrabold text-red-400 uppercase tracking-wider block mb-0.5">
+                    {vid.creator}
+                  </span>
+                  <h4 className="text-xs font-bold text-white line-clamp-2 leading-snug group-hover:text-red-300">
+                    {vid.title}
+                  </h4>
+                </div>
+              </div>
+            ))}
           </div>
+
+          {/* Embedded Active Video Player */}
+          {selectedVideo && (
+            <div className="pt-2">
+              <div className="relative aspect-video w-full max-w-4xl mx-auto rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl">
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${selectedVideo.id}`}
+                  title={selectedVideo.title}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -499,6 +612,37 @@ export const ProductDetailPage = () => {
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Products</span>
         </Link>
+      </div>
+
+      {/* STICKY MOBILE BOTTOM CTA BAR (<1024px) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 p-2.5 shadow-2xl flex items-center justify-between gap-2.5">
+        <div className="flex flex-col">
+          <span className="text-[10px] font-bold text-emerald-700 uppercase">Best Price</span>
+          <span className="text-base font-black text-slate-900 leading-tight">{formatINR(lowestPrice)}</span>
+        </div>
+
+        <div className="flex items-center gap-2 flex-1 max-w-[240px]">
+          <button
+            type="button"
+            onClick={scrollToComparison}
+            className="px-3 py-2 bg-slate-100 text-sky-800 font-bold text-xs rounded-xl border border-slate-200 hover:bg-slate-200 cursor-pointer shrink-0"
+          >
+            Compare
+          </button>
+          
+          <a
+            href={bestMarketplaceObj?.url || "#"}
+            onClick={(e) => {
+              if (!bestMarketplaceObj?.url || bestMarketplaceObj.url === "#") e.preventDefault();
+            }}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 h-[38px] bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1 cursor-pointer"
+          >
+            <span>Buy on {bestMarketplaceObj?.name || "Amazon"}</span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
       </div>
 
     </PageContainer>

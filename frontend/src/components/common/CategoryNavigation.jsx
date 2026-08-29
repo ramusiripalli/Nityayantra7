@@ -1,16 +1,18 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import * as Icons from 'lucide-react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LayoutGrid, ChevronDown, ChevronUp, Check, Home } from 'lucide-react';
 import { CATEGORIES } from '../../data/categories';
 
 export const CategoryNavigation = ({ activeCategory, onSelectCategory }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const scrollRef = useRef(null);
+  const mobileContainerRef = useRef(null);
 
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
 
   // Determine active category slug from props or URL pathname
   const currentCategory = activeCategory || (
@@ -21,7 +23,9 @@ export const CategoryNavigation = ({ activeCategory, onSelectCategory }) => {
       : 'all'
   );
 
-  // Category Accent Colors & Light Tint Container Map matching reference screenshot
+  const activeCategoryObj = CATEGORIES.find((c) => c.slug === currentCategory) || CATEGORIES[0];
+
+  // Category Accent Colors & Light Tint Container Map
   const categoryColorStyles = {
     all: {
       activeBg: "bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-xs",
@@ -113,6 +117,31 @@ export const CategoryNavigation = ({ activeCategory, onSelectCategory }) => {
     };
   }, [checkScrollPosition]);
 
+  // Click outside and Escape key handler to close mobile panel
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (mobileContainerRef.current && !mobileContainerRef.current.contains(e.target)) {
+        setIsCategoryMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsCategoryMenuOpen(false);
+      }
+    };
+
+    if (isCategoryMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isCategoryMenuOpen]);
+
   const handleScroll = (direction) => {
     const el = scrollRef.current;
     if (!el) return;
@@ -121,6 +150,7 @@ export const CategoryNavigation = ({ activeCategory, onSelectCategory }) => {
   };
 
   const handleCategoryClick = (category) => {
+    setIsCategoryMenuOpen(false);
     if (onSelectCategory) {
       onSelectCategory(category.slug);
     } else {
@@ -134,7 +164,7 @@ export const CategoryNavigation = ({ activeCategory, onSelectCategory }) => {
 
   return (
     <>
-      {/* 1. DESKTOP & TABLET CATEGORY BAR (≥768px): HORIZONTAL SCROLL WITH ARROWS */}
+      {/* 1. DESKTOP & TABLET CATEGORY BAR (≥768px): HORIZONTAL SCROLL WITH ARROWS (UNTOUCHED) */}
       <div className="hidden md:flex relative w-full bg-white border-b border-slate-200/90 py-2.5 px-4 h-[50px] items-center shadow-2xs">
         <div className="max-w-7xl mx-auto relative w-full flex items-center overflow-hidden">
           
@@ -201,42 +231,80 @@ export const CategoryNavigation = ({ activeCategory, onSelectCategory }) => {
         </div>
       </div>
 
-      {/* 2. MOBILE CATEGORY GRID (<768px): EXACT 5-COLUMN x 2-ROW GRID (NO ARROWS, ALL VISIBLE) */}
-      <div className="md:hidden w-full bg-white border-b border-slate-200/90 px-2 py-3">
-        <div className="grid grid-cols-5 gap-y-3 gap-x-1 sm:gap-x-2 text-center">
-          {CATEGORIES.map((cat) => {
-            const IconComponent = Icons[cat.icon] || Icons.Tag;
-            const isActive = currentCategory === cat.slug;
-            const styles = categoryColorStyles[cat.slug] || categoryColorStyles.all;
+      {/* 2. MOBILE COMPACT CATEGORY CONTROL & COLLAPSIBLE 5x2 PANEL (<768px) */}
+      <div ref={mobileContainerRef} className="md:hidden w-full bg-white border-b border-slate-200/90 px-3 py-1.5 shadow-2xs relative z-20">
+        
+        {/* COMPACT CATEGORY CONTROL BAR */}
+        <div className="h-[36px] flex items-center justify-between gap-2">
+          
+          {/* Categories Toggle Control Button */}
+          <button
+            type="button"
+            onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)}
+            aria-expanded={isCategoryMenuOpen}
+            aria-label="Toggle category menu"
+            className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs flex items-center gap-1.5 border border-slate-200/80 cursor-pointer active:scale-95 transition-all"
+          >
+            <LayoutGrid className="w-3.5 h-3.5 text-sky-600" />
+            <span>Categories</span>
+          </button>
 
-            return (
-              <button
-                key={cat.id}
-                onClick={() => handleCategoryClick(cat)}
-                className="flex flex-col items-center justify-center group cursor-pointer w-full focus:outline-none"
-                aria-label={`Category ${cat.name}`}
-              >
-                {/* Circular/Rounded Icon Background Box */}
-                <div
-                  className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center mb-1 transition-all duration-200 ${
-                    isActive ? styles.activeBg : styles.inactiveBg
-                  }`}
-                >
-                  <IconComponent className={`w-5 h-5 ${isActive ? 'text-white' : styles.iconColor}`} />
-                </div>
+          {/* Active Category Selector Button */}
+          <button
+            type="button"
+            onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)}
+            className="px-3 py-1.5 rounded-lg text-xs font-extrabold bg-sky-50 text-sky-700 border border-sky-200/90 flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95 transition-all"
+          >
+            <span>{activeCategoryObj.name}</span>
+            {isCategoryMenuOpen ? (
+              <ChevronUp className="w-3.5 h-3.5 text-sky-600 stroke-[2.5]" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5 text-sky-600 stroke-[2.5]" />
+            )}
+          </button>
 
-                {/* Category Name Label */}
-                <span
-                  className={`text-[10px] sm:text-[11px] leading-tight text-center truncate w-full ${
-                    isActive ? styles.activeText : styles.inactiveText
-                  }`}
-                >
-                  {cat.name}
-                </span>
-              </button>
-            );
-          })}
         </div>
+
+        {/* COLLAPSIBLE 5 × 2 CATEGORY PANEL */}
+        {isCategoryMenuOpen && (
+          <div className="mt-2.5 pt-2 pb-3 border-t border-slate-100 animate-fadeIn">
+            <div className="grid grid-cols-5 gap-y-3 gap-x-1 sm:gap-x-2 text-center">
+              {CATEGORIES.map((cat) => {
+                const IconComponent = Icons[cat.icon] || Icons.Tag;
+                const isActive = currentCategory === cat.slug;
+                const styles = categoryColorStyles[cat.slug] || categoryColorStyles.all;
+
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => handleCategoryClick(cat)}
+                    className="flex flex-col items-center justify-center group cursor-pointer w-full focus:outline-none"
+                    aria-label={`Select category ${cat.name}`}
+                  >
+                    {/* Rounded Icon Box */}
+                    <div
+                      className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center mb-1 transition-all duration-200 ${
+                        isActive ? styles.activeBg : styles.inactiveBg
+                      }`}
+                    >
+                      <IconComponent className={`w-4 h-4 ${isActive ? 'text-white' : styles.iconColor}`} />
+                    </div>
+
+                    {/* Category Label */}
+                    <span
+                      className={`text-[10px] sm:text-[11px] leading-tight text-center truncate w-full ${
+                        isActive ? styles.activeText : styles.inactiveText
+                      }`}
+                    >
+                      {cat.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
       </div>
     </>
   );
