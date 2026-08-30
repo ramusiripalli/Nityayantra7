@@ -97,15 +97,25 @@ export const getProducts = asyncHandler(async (req, res) => {
     }
   }
 
-  // 4. Text Search against name, description, keyFeatures
+  // 4. Exact numeric Product ID search OR Text Search
   if (search && search.trim() !== '') {
-    const searchRegex = new RegExp(search.trim(), 'i');
-    query.$or = [
-      { name: searchRegex },
-      { description: searchRegex },
-      { keyFeatures: searchRegex },
-      { shortDescription: searchRegex }
-    ];
+    const trimmed = search.trim();
+    const isPureNumeric = /^\d+$/.test(trimmed);
+
+    if (isPureNumeric) {
+      // Pure numeric search is exact for Product ID
+      query.$or = [
+        { productId: parseInt(trimmed, 10) }
+      ];
+    } else {
+      const searchRegex = new RegExp(trimmed, 'i');
+      query.$or = [
+        { name: searchRegex },
+        { description: searchRegex },
+        { keyFeatures: searchRegex },
+        { shortDescription: searchRegex }
+      ];
+    }
   }
 
   // 5. Sorting Options

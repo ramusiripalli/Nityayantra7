@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageContainer from '../components/common/PageContainer';
 import ProductCard from '../components/product/ProductCard';
-import HeroSection from '../components/home/HeroSection';
 import { productService } from '../services/productService';
 import { categoryService } from '../services/categoryService';
 import { 
@@ -99,46 +98,7 @@ export const HomePage = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8 pb-12">
-      
-      {/* ================================================== */}
-      {/* 1. HERO SECTION (Preserved in Code, Hidden from UI) */}
-      {/* ================================================== */}
-      {/* 
-        <HeroSection featuredProduct={products.find(p => p.isFeatured) || products[0]} /> 
-      */}
-
-      {/* ================================================== */}
-      {/* 2. COMPACT CATEGORY NAVIGATION STRIP */}
-      {/* ================================================== */}
-      {categoryGroups.length > 0 && (
-        <div className="bg-white border-b border-slate-200/80 shadow-2xs py-2 sm:py-2.5">
-          <PageContainer>
-            <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar py-0.5 whitespace-nowrap">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1 hidden sm:inline">
-                Categories:
-              </span>
-              {categoryGroups.map(({ category }) => {
-                const catSlug = category.slug || category.name?.toLowerCase().replace(/\s+/g, '-');
-                return (
-                  <Link
-                    key={category._id || category.id || catSlug}
-                    to={`/category/${catSlug}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-sky-50 text-slate-700 hover:text-sky-700 border border-slate-200/80 hover:border-sky-200 text-xs font-bold transition-colors shrink-0 shadow-2xs"
-                  >
-                    {getCategoryIcon(category.icon)}
-                    <span>{category.name}</span>
-                  </Link>
-                );
-              })}
-            </div>
-          </PageContainer>
-        </div>
-      )}
-
-      {/* ================================================== */}
-      {/* 3. CATEGORY-GROUPED PRODUCT SECTIONS */}
-      {/* ================================================== */}
-      <PageContainer className="space-y-8 sm:space-y-10">
+      <PageContainer className="space-y-8 sm:space-y-10 pt-2">
         
         {loading ? (
           // Skeleton Loading State
@@ -146,9 +106,9 @@ export const HomePage = () => {
             {[1, 2].map((i) => (
               <div key={i} className="animate-pulse space-y-3">
                 <div className="h-6 w-40 bg-slate-200 rounded" />
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
-                  {[1, 2, 3, 4, 5, 6].map((j) => (
-                    <div key={j} className="h-64 bg-slate-200 rounded-xl" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 w-full items-stretch">
+                  {[1, 2, 3, 4].map((j) => (
+                    <div key={j} className="h-72 w-full bg-slate-200 rounded-2xl" />
                   ))}
                 </div>
               </div>
@@ -160,16 +120,16 @@ export const HomePage = () => {
             <Package className="w-12 h-12 text-slate-300 mx-auto" />
             <h2 className="text-lg font-bold text-slate-900">No products available yet.</h2>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Check back soon! Products added in the Admin CMS will appear here dynamically.
+              Products published in the Admin CMS will appear here automatically.
             </p>
           </div>
         ) : (
-          // Category Sections
+          // Category Sections (Only categories with products)
           categoryGroups.map(({ category, products: catProds }) => {
             const catSlug = category.slug || category.name?.toLowerCase().replace(/\s+/g, '-');
             
             return (
-              <section key={category._id || category.id || catSlug} className="space-y-3 sm:space-y-4">
+              <section key={category._id || category.id || catSlug} className="space-y-4 sm:space-y-5">
                 
                 {/* Category Header Row */}
                 <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
@@ -192,33 +152,11 @@ export const HomePage = () => {
                   </Link>
                 </div>
 
-                {/* Desktop: Compact Responsive Grid (4 to 6 compact cards ~210px–240px wide) */}
-                <div className="hidden sm:grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
-                  {catProds.slice(0, 6).map((product) => (
+                {/* Responsive Grid: 1 product per row on mobile, 2 on tablet, 3-4 cards on desktop */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 w-full items-stretch">
+                  {catProds.map((product) => (
                     <ProductCard key={product._id || product.id} product={product} />
                   ))}
-                </div>
-
-                {/* Mobile: EXACTLY 2 Product Cards per row */}
-                <div className="sm:hidden space-y-2.5">
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {catProds.slice(0, 2).map((product) => (
-                      <ProductCard key={product._id || product.id} product={product} />
-                    ))}
-                  </div>
-
-                  {/* Mobile "See All" link if > 2 items exist */}
-                  {catProds.length > 2 && (
-                    <div className="text-center pt-1">
-                      <Link
-                        to={`/category/${catSlug}`}
-                        className="inline-flex items-center justify-center gap-1.5 w-full py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl border border-slate-200/80 transition-colors"
-                      >
-                        <span>See All {catProds.length} in {category.name}</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
-                    </div>
-                  )}
                 </div>
 
               </section>
@@ -227,7 +165,6 @@ export const HomePage = () => {
         )}
 
       </PageContainer>
-
     </div>
   );
 };

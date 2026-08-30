@@ -75,6 +75,10 @@ const productImageSchema = new mongoose.Schema(
 // Main Product Schema
 const productSchema = new mongoose.Schema(
   {
+    productId: {
+      type: Number,
+      index: true,
+    },
     name: {
       type: String,
       required: [true, 'Product name is required'],
@@ -227,6 +231,19 @@ productSchema.index({ name: 'text', description: 'text', keyFeatures: 'text' });
 productSchema.index({ category: 1, isPublished: 1 });
 productSchema.index({ isPublished: 1, isFeatured: 1 });
 productSchema.index({ isPublished: 1, isTrending: 1 });
+
+// Auto-increment productId for new products if not provided
+productSchema.pre('save', async function (next) {
+  if (this.isNew && !this.productId) {
+    try {
+      const lastProduct = await mongoose.model('Product').findOne({}, { productId: 1 }).sort({ productId: -1 });
+      this.productId = (lastProduct && lastProduct.productId) ? lastProduct.productId + 1 : 1;
+    } catch (err) {
+      this.productId = 1;
+    }
+  }
+  next();
+});
 
 const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
 

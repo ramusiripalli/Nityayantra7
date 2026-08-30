@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import PageContainer from '../components/common/PageContainer';
-import SectionHeader from '../components/common/SectionHeader';
 import ProductGrid from '../components/product/ProductGrid';
 import { productService } from '../services/productService';
-import { ChevronRight, ArrowUpDown } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 export const ProductsPage = () => {
   const [products, setProducts] = useState([]);
@@ -44,48 +43,46 @@ export const ProductsPage = () => {
   }, [products, sortBy]);
 
   return (
-    <PageContainer>
+    <PageContainer className="pt-3 pb-16">
       
       {/* 1. Breadcrumb: Home > All Products */}
-      <nav className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-5">
+      <nav className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-3">
         <Link to="/" className="hover:text-sky-600">Home</Link>
-        <ChevronRight className="w-3.5 h-3.5" />
+        <ChevronRight className="w-3 h-3" />
         <span className="text-slate-900 font-bold">All Products</span>
       </nav>
 
-      {/* 2. Page Header */}
-      <SectionHeader
-        badge="Full Catalog"
-        title="All Products"
-        subtitle="Explore all products across categories, compare prices and watch reviews."
-      />
-
-      {/* 3. Clean Full-Width Toolbar (Count + Simple Sort) */}
-      <div className="flex items-center justify-between gap-3 py-3 border-y border-slate-200/90 mb-6">
-        <span className="text-xs sm:text-sm font-bold text-slate-700">
-          <strong className="text-slate-900 font-black">{sortedProducts.length}</strong>{' '}
-          {sortedProducts.length === 1 ? 'product found' : 'products found'}
-        </span>
+      {/* 2. Compact Page Header */}
+      <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-6">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            All Products
+          </h1>
+          <p className="text-xs font-semibold text-slate-500 mt-0.5">
+            {sortedProducts.length} {sortedProducts.length === 1 ? 'product found' : 'products found'}
+          </p>
+        </div>
 
         {/* Simple Sort Dropdown */}
-        <div className="flex items-center gap-2 text-xs">
-          <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
-          <span className="font-bold text-slate-500 hidden sm:inline">Sort:</span>
-          <select
-            value={sortBy}
-            aria-label="Sort all products"
-            onChange={(e) => setSortBy(e.target.value)}
-            className="font-bold bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer text-xs text-slate-800"
-          >
-            <option value="featured">Featured</option>
-            <option value="price_low">Lowest Price</option>
-            <option value="newest">Newest</option>
-          </select>
-        </div>
+        {sortedProducts.length > 1 && (
+          <div className="flex items-center gap-2 text-xs">
+            <span className="font-bold text-slate-400 hidden sm:inline">Sort:</span>
+            <select
+              value={sortBy}
+              aria-label="Sort all products"
+              onChange={(e) => setSortBy(e.target.value)}
+              className="font-bold bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer text-xs text-slate-800"
+            >
+              <option value="featured">Featured</option>
+              <option value="price_low">Lowest Price</option>
+              <option value="newest">Newest</option>
+            </select>
+          </div>
+        )}
       </div>
 
-      {/* 4. Full-Width Product Grid */}
-      <div className="w-full mb-16">
+      {/* 3. Full-Width Product Grid (1 per row mobile, 3-4 desktop) */}
+      <div className="w-full">
         <ProductGrid 
           products={sortedProducts} 
           isLoading={loading} 

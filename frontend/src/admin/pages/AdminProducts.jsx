@@ -238,6 +238,7 @@ export const AdminProducts = () => {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200/80 text-slate-500 uppercase tracking-wider font-bold text-[10.5px]">
+                  <th className="py-3.5 px-3 w-12 text-center">ID</th>
                   <th className="py-3.5 px-4">Image</th>
                   <th className="py-3.5 px-4">Product Details</th>
                   <th className="py-3.5 px-4">Category</th>
@@ -251,6 +252,11 @@ export const AdminProducts = () => {
               <tbody className="divide-y divide-slate-100 font-medium">
                 {filteredProducts.map((prod) => (
                   <tr key={prod._id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-3 text-center">
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-600 text-white font-black text-xs shadow-xs">
+                        {prod.productId || 1}
+                      </span>
+                    </td>
                     <td className="py-3 px-4">
                       <div className="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 p-1 flex items-center justify-center overflow-hidden shrink-0">
                         <img

@@ -1,11 +1,10 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Public Layout & Pages
 import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
 import ProductsPage from './pages/ProductsPage';
-import ProductDetailPage from './pages/ProductDetailPage';
 import CategoryPage from './pages/CategoryPage';
 import SearchResultsPage from './pages/SearchResultsPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -28,10 +27,11 @@ export function App() {
         <Route path="/" element={<MainLayout />}>
           <Route index element={<HomePage />} />
           <Route path="products" element={<ProductsPage />} />
-          <Route path="product/:id" element={<ProductDetailPage />} />
-          <Route path="products/:id" element={<ProductDetailPage />} />
           <Route path="category/:slug" element={<CategoryPage />} />
           <Route path="search" element={<SearchResultsPage />} />
+          {/* Redirect any legacy product detail links directly to products catalog */}
+          <Route path="product/:id" element={<Navigate to="/products" replace />} />
+          <Route path="products/:id" element={<Navigate to="/products" replace />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
 
