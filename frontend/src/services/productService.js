@@ -1,142 +1,76 @@
-import { MOCK_PRODUCTS } from '../data/mockProducts';
 import api from './api';
 
 /**
- * Service abstraction for product API calls & search.
- * Uses local mock data with Promises to prepare for future Express/MongoDB backend integration.
+ * Filter helper to isolate development/test products from the public website
  */
+const isTestProduct = (prod) => {
+  const name = (prod.name || '').toLowerCase();
+  const slug = (prod.slug || '').toLowerCase();
+  const catName = (typeof prod.category === 'object' ? prod.category?.name : prod.category || '').toLowerCase();
+  const catSlug = (typeof prod.category === 'object' ? prod.category?.slug : '').toLowerCase();
+
+  return (
+    name.startsWith('test') ||
+    name === 'ramu' ||
+    slug.startsWith('test-') ||
+    slug === 'ramu' ||
+    catName.startsWith('test') ||
+    catSlug.startsWith('test') ||
+    name.includes('sample product') ||
+    name.includes('demo product')
+  );
+};
+
 export const productService = {
   /**
-   * Get all products with multi-faceted filtering & sorting
+   * Get all products from MongoDB, isolating any development/test records from public display
    */
   async getProducts(params = {}) {
     try {
       const response = await api.get('/products', { params });
+      let list = [];
       if (response && response.data && Array.isArray(response.data.products)) {
-        return response.data.products;
+        list = response.data.products;
       } else if (response && Array.isArray(response.data)) {
-        return response.data;
+        list = response.data;
       }
+      return list.filter((p) => !isTestProduct(p));
     } catch (err) {
-      // Fallback to local mock data if backend unavailable
+      console.error('Failed to fetch products from backend API:', err.message);
+      return [];
     }
-
-    return new Promise((resolve) => {
-      let filtered = [...MOCK_PRODUCTS];
-
-      // Category filtering
-      if (params.category && params.category !== 'all') {
-        if (params.category === 'deals') {
-          filtered = filtered.filter((p) => (p.discountPercent || 0) > 0 || p.isTrending || p.isBestDeal);
-        } else {
-          filtered = filtered.filter(
-            (p) => p.category?.toLowerCase() === params.category?.toLowerCase()
-          );
-        }
-      }
-
-      // Case-insensitive search across title, category, shortDescription, description
-      if (params.search) {
-        const query = params.search.toLowerCase().trim();
-        filtered = filtered.filter(
-          (p) =>
-            p.title?.toLowerCase().includes(query) ||
-            p.category?.toLowerCase().includes(query) ||
-            p.shortDescription?.toLowerCase().includes(query) ||
-            p.description?.toLowerCase().includes(query)
-        );
-      }
-
-      // Min/Max Price Filtering
-      if (params.minPrice !== undefined && params.minPrice !== null && params.minPrice !== '') {
-        filtered = filtered.filter((p) => p.currentPrice >= Number(params.minPrice));
-      }
-      if (params.maxPrice !== undefined && params.maxPrice !== null && params.maxPrice !== '') {
-        filtered = filtered.filter((p) => p.currentPrice <= Number(params.maxPrice));
-      }
-
-      // Rating Filtering
-      if (params.minRating) {
-        filtered = filtered.filter((p) => (p.rating || 0) >= Number(params.minRating));
-      }
-
-      // Marketplace Filtering
-      if (params.marketplaces && params.marketplaces.length > 0) {
-        const mps = Array.isArray(params.marketplaces) ? params.marketplaces : [params.marketplaces];
-        if (mps.length > 0) {
-          filtered = filtered.filter((p) => {
-            if (!p.lowestMarketplace) return true;
-            return mps.some((m) => m.toLowerCase() === p.lowestMarketplace.toLowerCase());
-          });
-        }
-      }
-
-      // Sorting
-      if (params.sortBy) {
-        if (params.sortBy === 'price_low') {
-          filtered.sort((a, b) => a.currentPrice - b.currentPrice);
-        } else if (params.sortBy === 'price_high') {
-          filtered.sort((a, b) => b.currentPrice - a.currentPrice);
-        } else if (params.sortBy === 'rating') {
-          filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        } else if (params.sortBy === 'discount') {
-          filtered.sort((a, b) => (b.discountPercent || 0) - (a.discountPercent || 0));
-        } else if (params.sortBy === 'featured') {
-          filtered.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
-        }
-      }
-
-      setTimeout(() => resolve(filtered), 50);
-    });
   },
 
   /**
-   * Autocomplete suggestions helper
+   * Autocomplete suggestions helper from real products
    */
   async autocompleteProducts(query = '') {
-    return new Promise((resolve) => {
-      if (!query.trim()) {
-        resolve({ textSuggestions: [], productPreviews: [] });
-        return;
-      }
+    if (!query.trim()) {
+      return { textSuggestions: [], productPreviews: [] };
+    }
 
-      const q = query.toLowerCase().trim();
+    try {
+      const response = await api.get('/products', { params: { search: query.trim() } });
+      const products = (response?.data?.products || response?.data || []).filter((p) => !isTestProduct(p));
+      const matching = products.slice(0, 4);
 
-      // Matching Products (up to 4)
-      const matchingProducts = MOCK_PRODUCTS.filter(
-        (p) =>
-          p.title?.toLowerCase().includes(q) ||
-          p.category?.toLowerCase().includes(q) ||
-          p.shortDescription?.toLowerCase().includes(q)
-      ).slice(0, 4);
-
-      // Generate realistic text search suggestions
       const textSuggestions = [];
-      
-      // Category match
-      const matchedCategory = MOCK_PRODUCTS.find((p) => p.category?.toLowerCase().includes(q));
-      if (matchedCategory) {
-        textSuggestions.push(`${query} in ${matchedCategory.category}`);
-      }
+      matching.forEach((p) => {
+        const title = p.name || p.title;
+        if (title) textSuggestions.push(title);
+      });
 
-      textSuggestions.push(`${query}`);
-      textSuggestions.push(`${query} under ₹5000`);
-      textSuggestions.push(`best ${query} deals`);
-
-      // Deduplicate
-      const uniqueText = [...new Set(textSuggestions)].slice(0, 4);
-
-      setTimeout(() => {
-        resolve({
-          textSuggestions: uniqueText,
-          productPreviews: matchingProducts,
-        });
-      }, 30);
-    });
+      return {
+        textSuggestions: [...new Set(textSuggestions)].slice(0, 4),
+        productPreviews: matching,
+      };
+    } catch (err) {
+      return { textSuggestions: [], productPreviews: [] };
+    }
   },
 
   /**
-   * Get product by ID or Slug (tries backend MongoDB API first, then mock fallback)
+   * Get product by ID or Slug from MongoDB
    */
   async getProductById(id) {
     try {
@@ -144,39 +78,36 @@ export const productService = {
       if (response && response.data) {
         return response.data;
       }
+      throw new Error('Product not found');
     } catch (err) {
-      // Backend request failed or returned 404, fallback to local mock search
+      throw new Error(err.message || 'Product not found');
     }
-
-    return new Promise((resolve, reject) => {
-      const product = MOCK_PRODUCTS.find(
-        (p) => String(p.id) === String(id) || p.slug === String(id) || String(p._id) === String(id)
-      );
-      if (product) resolve(product);
-      else reject(new Error('Product not found'));
-    });
   },
 
   /**
    * Get featured products
    */
   async getFeaturedProducts() {
-    return new Promise((resolve) => {
-      const featured = MOCK_PRODUCTS.filter((p) => p.isFeatured);
-      setTimeout(() => resolve(featured), 50);
-    });
+    try {
+      const response = await api.get('/products', { params: { featured: 'true' } });
+      const list = response?.data?.products || response?.data || [];
+      return list.filter((p) => !isTestProduct(p));
+    } catch (err) {
+      return [];
+    }
   },
 
   /**
    * Get trending deals
    */
   async getTrendingDeals() {
-    return new Promise((resolve) => {
-      const trending = [...MOCK_PRODUCTS]
-        .filter((p) => p.isTrending || (p.discountPercent || 0) > 0)
-        .sort((a, b) => (b.discountPercent || 0) - (a.discountPercent || 0));
-      setTimeout(() => resolve(trending), 50);
-    });
+    try {
+      const response = await api.get('/products', { params: { trending: 'true' } });
+      const list = response?.data?.products || response?.data || [];
+      return list.filter((p) => !isTestProduct(p));
+    } catch (err) {
+      return [];
+    }
   }
 };
 

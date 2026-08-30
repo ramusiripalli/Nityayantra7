@@ -1,10 +1,19 @@
-import React, { useState } from 'react';
-import { CATEGORIES } from '../../data/categories';
+import React, { useState, useEffect } from 'react';
+import { categoryService } from '../../services/categoryService';
 import { Filter, RotateCcw, ChevronDown, Check, Star, PlayCircle, CheckCircle } from 'lucide-react';
 
 export const FilterSidebar = ({ filters, onFilterChange, onClearAll, className = '' }) => {
   const [customMin, setCustomMin] = useState(filters.minPrice || '');
   const [customMax, setCustomMax] = useState(filters.maxPrice || '');
+  const [categories, setCategories] = useState([{ id: 'all', name: 'All Categories', slug: 'all' }]);
+
+  useEffect(() => {
+    categoryService.getCategories().then((cats) => {
+      if (Array.isArray(cats) && cats.length > 0) {
+        setCategories([{ id: 'all', name: 'All Categories', slug: 'all' }, ...cats]);
+      }
+    });
+  }, []);
 
   const marketplacesList = [
     { id: 'amazon', name: 'Amazon', color: 'text-amber-700' },
@@ -76,7 +85,7 @@ export const FilterSidebar = ({ filters, onFilterChange, onClearAll, className =
           Category
         </h4>
         <div className="space-y-1 max-h-48 overflow-y-auto no-scrollbar pr-1">
-          {CATEGORIES.map((cat) => {
+          {categories.map((cat) => {
             const isActive = (filters.category || 'all') === cat.slug;
             return (
               <button

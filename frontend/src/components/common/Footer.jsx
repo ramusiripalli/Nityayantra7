@@ -15,7 +15,7 @@ export const Footer = () => {
           <div className="md:col-span-1 space-y-4">
             <Logo size="medium" showTagline={true} className="brightness-110" />
             <p className="text-xs text-slate-400 leading-relaxed">
-              Nitya Yantra is India's premier product discovery and affiliate comparison platform for everyday gadgets, kitchen tools, and smart home tech.
+              Nitya Yantra is India's premier product discovery and video review platform for everyday gadgets, kitchen tools, and smart home tech.
             </p>
             <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-3 py-1.5 rounded-lg w-fit">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />

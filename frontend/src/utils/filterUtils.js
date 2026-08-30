@@ -1,5 +1,6 @@
 /**
  * Reusable utility functions for filtering, sorting, parsing and serializing product filters.
+ * Works seamlessly with real MongoDB Product and Category documents.
  */
 
 export function parseFilterParams(searchParams) {
@@ -46,15 +47,35 @@ export function countActiveFilters(filters) {
   return count;
 }
 
+export function getProductPrice(p) {
+  if (p.lowestPrice !== undefined && p.lowestPrice !== null && p.lowestPrice > 0) return p.lowestPrice;
+  if (p.currentPrice !== undefined && p.currentPrice !== null && p.currentPrice > 0) return p.currentPrice;
+  if (p.marketplaceOffers && Array.isArray(p.marketplaceOffers) && p.marketplaceOffers.length > 0 && p.marketplaceOffers[0]?.price > 0) {
+    return p.marketplaceOffers[0].price;
+  }
+  return 0;
+}
+
 export function filterProducts(products = [], filters = {}) {
   let result = [...products];
 
   // 1. Category Filter
   if (filters.category && filters.category !== 'all') {
-    if (filters.category === 'deals') {
+    const targetCat = filters.category.toLowerCase().trim();
+    if (targetCat === 'deals') {
       result = result.filter((p) => (p.discountPercent || 0) > 0 || p.isTrending || p.isBestDeal);
     } else {
-      result = result.filter((p) => p.category?.toLowerCase() === filters.category?.toLowerCase());
+      result = result.filter((p) => {
+        if (!p.category) return false;
+        if (typeof p.category === 'object') {
+          const cSlug = (p.category.slug || '').toLowerCase();
+          const cName = (p.category.name || '').toLowerCase();
+          const cId = String(p.category._id || p.category.id || '').toLowerCase();
+          return cSlug === targetCat || cName === targetCat || cId === targetCat;
+        }
+        const cStr = String(p.category).toLowerCase();
+        return cStr === targetCat;
+      });
     }
   }
 
@@ -69,10 +90,10 @@ export function filterProducts(products = [], filters = {}) {
   else if (filters.pricePreset === 'above_10000') { minP = 10000; maxP = Infinity; }
 
   if (minP !== null && !isNaN(minP)) {
-    result = result.filter((p) => p.currentPrice >= minP);
+    result = result.filter((p) => getProductPrice(p) >= minP);
   }
   if (maxP !== null && !isNaN(maxP)) {
-    result = result.filter((p) => p.currentPrice <= maxP);
+    result = result.filter((p) => getProductPrice(p) <= maxP);
   }
 
   // 3. Rating Filter
@@ -83,8 +104,9 @@ export function filterProducts(products = [], filters = {}) {
   // 4. Marketplace Filter
   if (filters.marketplaces && filters.marketplaces.length > 0) {
     result = result.filter((p) => {
-      if (!p.lowestMarketplace) return true;
-      return filters.marketplaces.some((m) => m.toLowerCase() === p.lowestMarketplace.toLowerCase());
+      const best = (p.lowestMarketplace || p.marketplaceOffers?.[0]?.marketplace || '').toLowerCase();
+      const allMarkets = p.marketplaceOffers ? p.marketplaceOffers.map(o => (o.marketplace || '').toLowerCase()) : [best];
+      return filters.marketplaces.some((m) => allMarkets.includes(m.toLowerCase()));
     });
   }
 
@@ -95,7 +117,7 @@ export function filterProducts(products = [], filters = {}) {
 
   // 6. Video Review Filter
   if (filters.hasVideoReview) {
-    result = result.filter((p) => Boolean(p.youtubeVideoId));
+    result = result.filter((p) => Boolean(p.videos?.youtubeVideoId || p.youtubeVideoId));
   }
 
   // 7. In Stock Filter
@@ -115,9 +137,9 @@ export function sortProducts(products = [], sortBy = 'featured') {
   const sorted = [...products];
 
   if (sortBy === 'price_low') {
-    sorted.sort((a, b) => a.currentPrice - b.currentPrice);
+    sorted.sort((a, b) => getProductPrice(a) - getProductPrice(b));
   } else if (sortBy === 'price_high') {
-    sorted.sort((a, b) => b.currentPrice - a.currentPrice);
+    sorted.sort((a, b) => getProductPrice(b) - getProductPrice(a));
   } else if (sortBy === 'rating') {
     sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
   } else if (sortBy === 'discount') {
@@ -125,7 +147,7 @@ export function sortProducts(products = [], sortBy = 'featured') {
   } else if (sortBy === 'most_reviewed') {
     sorted.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0));
   } else if (sortBy === 'newest') {
-    sorted.sort((a, b) => b.id - a.id);
+    sorted.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
   } else if (sortBy === 'featured') {
     sorted.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
   }

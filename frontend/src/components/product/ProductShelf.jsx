@@ -64,7 +64,7 @@ export const ProductShelf = ({ products = [], isVideoShelf = false }) => {
       >
         {displayProducts.map((product) => (
           <div
-            key={product.id}
+            key={product._id || product.id || product.slug}
             className="w-[calc(50%-6px)] sm:w-[170px] lg:w-[180px] shrink-0 flex flex-col snap-start"
           >
             <ProductCard product={product} isVideoCard={isVideoShelf} />

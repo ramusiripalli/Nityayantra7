@@ -8,9 +8,10 @@ export const ActiveFilterChips = ({ filters, onFilterChange, onClearAll, classNa
   // Category chip
   if (filters.category && filters.category !== 'all') {
     const catObj = CATEGORIES.find((c) => c.slug === filters.category);
+    const catLabel = catObj ? catObj.name : filters.category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     chips.push({
       id: 'category',
-      label: `Category: ${catObj ? catObj.name : filters.category}`,
+      label: `Category: ${catLabel}`,
       onRemove: () => onFilterChange({ category: 'all' }),
     });
   }

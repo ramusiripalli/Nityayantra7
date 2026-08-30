@@ -1,5 +1,5 @@
-import React from 'react';
-import { CATEGORIES } from '../../data/categories';
+import React, { useState, useEffect } from 'react';
+import { categoryService } from '../../services/categoryService';
 import { Filter, X, RotateCcw, Check, Star, PlayCircle, CheckCircle } from 'lucide-react';
 
 export const MobileFilterSheet = ({ 
@@ -9,6 +9,16 @@ export const MobileFilterSheet = ({
   onFilterChange, 
   onClearAll 
 }) => {
+  const [categories, setCategories] = useState([{ id: 'all', name: 'All Categories', slug: 'all' }]);
+
+  useEffect(() => {
+    categoryService.getCategories().then((cats) => {
+      if (Array.isArray(cats) && cats.length > 0) {
+        setCategories([{ id: 'all', name: 'All Categories', slug: 'all' }, ...cats]);
+      }
+    });
+  }, []);
+
   if (!isOpen) return null;
 
   const marketplacesList = [
@@ -63,7 +73,7 @@ export const MobileFilterSheet = ({
             Category
           </span>
           <div className="flex flex-wrap gap-1.5">
-            {CATEGORIES.map((cat) => {
+            {categories.map((cat) => {
               const isActive = (filters.category || 'all') === cat.slug;
               return (
                 <button

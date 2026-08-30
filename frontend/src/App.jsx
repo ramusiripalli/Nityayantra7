@@ -29,6 +29,7 @@ export function App() {
           <Route index element={<HomePage />} />
           <Route path="products" element={<ProductsPage />} />
           <Route path="product/:id" element={<ProductDetailPage />} />
+          <Route path="products/:id" element={<ProductDetailPage />} />
           <Route path="category/:slug" element={<CategoryPage />} />
           <Route path="search" element={<SearchResultsPage />} />
           <Route path="*" element={<NotFoundPage />} />

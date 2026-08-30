@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import { ChevronLeft, ChevronRight, LayoutGrid, ChevronDown, ChevronUp, Check, Home } from 'lucide-react';
-import { CATEGORIES } from '../../data/categories';
+import { categoryService } from '../../services/categoryService';
 
 export const CategoryNavigation = ({ activeCategory, onSelectCategory }) => {
   const navigate = useNavigate();
@@ -10,9 +10,18 @@ export const CategoryNavigation = ({ activeCategory, onSelectCategory }) => {
   const scrollRef = useRef(null);
   const mobileContainerRef = useRef(null);
 
+  const [categories, setCategories] = useState([{ id: 'all', name: 'All', slug: 'all', icon: 'Grid' }]);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+
+  useEffect(() => {
+    categoryService.getCategories().then((cats) => {
+      if (Array.isArray(cats) && cats.length > 0) {
+        setCategories([{ id: 'all', name: 'All', slug: 'all', icon: 'Grid' }, ...cats]);
+      }
+    });
+  }, []);
 
   // Determine active category slug from props or URL pathname
   const currentCategory = activeCategory || (
@@ -23,7 +32,7 @@ export const CategoryNavigation = ({ activeCategory, onSelectCategory }) => {
       : 'all'
   );
 
-  const activeCategoryObj = CATEGORIES.find((c) => c.slug === currentCategory) || CATEGORIES[0];
+  const activeCategoryObj = categories.find((c) => c.slug === currentCategory) || categories[0];
 
   // Category Accent Colors & Light Tint Container Map
   const categoryColorStyles = {
@@ -187,7 +196,7 @@ export const CategoryNavigation = ({ activeCategory, onSelectCategory }) => {
             onScroll={checkScrollPosition}
             className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap w-full py-1 px-2"
           >
-            {CATEGORIES.map((cat) => {
+            {categories.map((cat) => {
               const IconComponent = Icons[cat.icon] || Icons.Tag;
               const isActive = currentCategory === cat.slug;
               const isDeal = cat.isSpecial;
@@ -269,7 +278,7 @@ export const CategoryNavigation = ({ activeCategory, onSelectCategory }) => {
         {isCategoryMenuOpen && (
           <div className="mt-2.5 pt-2 pb-3 border-t border-slate-100 animate-fadeIn">
             <div className="grid grid-cols-5 gap-y-3 gap-x-1 sm:gap-x-2 text-center">
-              {CATEGORIES.map((cat) => {
+              {categories.map((cat) => {
                 const IconComponent = Icons[cat.icon] || Icons.Tag;
                 const isActive = currentCategory === cat.slug;
                 const styles = categoryColorStyles[cat.slug] || categoryColorStyles.all;
