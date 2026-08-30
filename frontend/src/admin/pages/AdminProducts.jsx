@@ -244,6 +244,7 @@ export const AdminProducts = () => {
                   <th className="py-3.5 px-4">Lowest Price</th>
                   <th className="py-3.5 px-4">Marketplace</th>
                   <th className="py-3.5 px-4">Status</th>
+                  <th className="py-3.5 px-4">Created Date</th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -256,6 +257,10 @@ export const AdminProducts = () => {
                           src={prod.images?.[0]?.url || 'https://via.placeholder.com/100'}
                           alt={prod.name}
                           className="w-full h-full object-contain"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = 'https://via.placeholder.com/100?text=No+Image';
+                          }}
                         />
                       </div>
                     </td>
@@ -280,6 +285,9 @@ export const AdminProducts = () => {
                         isFeatured={prod.isFeatured}
                         isTrending={prod.isTrending}
                       />
+                    </td>
+                    <td className="py-3 px-4 text-slate-500 text-[11px]">
+                      {prod.createdAt ? new Date(prod.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
                     </td>
                     <td className="py-3 px-4 text-right space-x-1 whitespace-nowrap">
                       <Link

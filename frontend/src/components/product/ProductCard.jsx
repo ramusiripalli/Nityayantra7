@@ -28,6 +28,10 @@ export const ProductCard = ({ product, isVideoCard = false, className = '' }) =>
           alt={product.title}
           className="w-full h-full object-contain object-center group-hover:scale-[1.03] transition-transform duration-200 pointer-events-none"
           loading="lazy"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = 'https://via.placeholder.com/400x400?text=No+Image';
+          }}
         />
 
         {/* 1. Top-Left Compact Green Discount Badge */}
@@ -113,7 +117,7 @@ export const ProductCard = ({ product, isVideoCard = false, className = '' }) =>
 
           {/* 11. Primary Action Button: "Compare Deals →" */}
           <Link
-            to={`/product/${product.id}`}
+            to={`/product/${product.slug || product.id || product._id}`}
             className="w-full h-[32px] bg-sky-50 hover:bg-sky-600 text-sky-700 hover:text-white font-bold text-[11px] rounded-lg border border-sky-200/80 hover:border-sky-600 transition-all duration-200 flex items-center justify-center gap-1 mt-1 cursor-pointer shadow-2xs"
           >
             <span>Compare Deals</span>

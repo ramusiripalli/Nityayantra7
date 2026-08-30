@@ -8,9 +8,18 @@ import mongoose from 'mongoose';
  */
 const extractYouTubeVideoId = (url) => {
   if (!url || typeof url !== 'string') return '';
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|&v=)([^#&?]*).*/;
   const match = url.trim().match(regExp);
   return match && match[2].length === 11 ? match[2] : '';
+};
+
+/**
+ * Validate HTTP/HTTPS image URL format
+ */
+const isValidHttpUrl = (urlStr) => {
+  if (!urlStr || typeof urlStr !== 'string') return false;
+  const trimmed = urlStr.trim();
+  return trimmed.startsWith('http://') || trimmed.startsWith('https://');
 };
 
 /**
@@ -227,6 +236,14 @@ export const createProduct = asyncHandler(async (req, res) => {
     throw new Error('At least one product image with a valid URL is required');
   }
 
+  // Validate all image URLs start with http:// or https://
+  for (const img of images) {
+    if (!img.url || !isValidHttpUrl(img.url)) {
+      res.status(400);
+      throw new Error('Product image URL must be a valid HTTP or HTTPS address');
+    }
+  }
+
   if (!marketplaceOffers || !Array.isArray(marketplaceOffers) || marketplaceOffers.length === 0 || !marketplaceOffers[0]?.url || marketplaceOffers[0]?.price === undefined) {
     res.status(400);
     throw new Error('At least one marketplace offer with a valid URL and price is required');
@@ -348,6 +365,20 @@ export const updateProduct = asyncHandler(async (req, res) => {
       throw new Error(`Product slug '${cleanSlug}' is already in use`);
     }
     req.body.slug = cleanSlug;
+  }
+
+  // Validate image URLs if provided
+  if (req.body.images && Array.isArray(req.body.images)) {
+    if (req.body.images.length === 0) {
+      res.status(400);
+      throw new Error('At least one product image with a valid URL is required');
+    }
+    for (const img of req.body.images) {
+      if (!img.url || !isValidHttpUrl(img.url)) {
+        res.status(400);
+        throw new Error('Product image URL must be a valid HTTP or HTTPS address');
+      }
+    }
   }
 
   // Auto-extract YouTube Video ID if omitted

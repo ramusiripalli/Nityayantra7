@@ -193,7 +193,7 @@ export const AdminProductForm = () => {
   // Helper: Extract YouTube Video ID
   const extractYouTubeId = (url) => {
     if (!url) return '';
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.trim().match(regExp);
     return match && match[2].length === 11 ? match[2] : '';
   };
@@ -552,11 +552,16 @@ export const AdminProductForm = () => {
         {/* ================================================== */}
         <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div className="flex items-center gap-2">
-              <ImageIcon className="w-5 h-5 text-sky-600" />
-              <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">
-                Section B — Product Images (URLs)
-              </h3>
+            <div>
+              <div className="flex items-center gap-2">
+                <ImageIcon className="w-5 h-5 text-sky-600" />
+                <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">
+                  Section B — Product Images (External Image URLs)
+                </h3>
+              </div>
+              <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                Enter a direct image URL (e.g., from Amazon, Flipkart, Myntra, Meesho, or Unsplash). No file upload is required.
+              </p>
             </div>
             <button
               type="button"
@@ -564,7 +569,7 @@ export const AdminProductForm = () => {
               className="px-3 py-1.5 bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Add Image</span>
+              <span>Add Another Image</span>
             </button>
           </div>
 
@@ -572,7 +577,7 @@ export const AdminProductForm = () => {
             {formData.images.map((img, idx) => (
               <div key={idx} className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-700">Image #{idx + 1}</span>
+                  <span className="text-xs font-bold text-slate-700">Image #{idx + 1} {idx === 0 ? '(Primary / Thumbnail)' : ''}</span>
                   {formData.images.length > 1 && (
                     <button
                       type="button"
@@ -591,7 +596,7 @@ export const AdminProductForm = () => {
                       type="url"
                       value={img.url}
                       onChange={(e) => handleImageChange(idx, 'url', e.target.value)}
-                      placeholder="https://images.unsplash.com/... or CDN image URL"
+                      placeholder="https://m.media-amazon.com/images/I/... or direct image URL"
                       required={idx === 0}
                       className="w-full px-3 py-2 bg-white border border-slate-200 focus:border-sky-600 rounded-lg text-xs font-medium outline-none"
                     />
@@ -599,7 +604,7 @@ export const AdminProductForm = () => {
                       type="text"
                       value={img.alt}
                       onChange={(e) => handleImageChange(idx, 'alt', e.target.value)}
-                      placeholder="Alt text / image title"
+                      placeholder="Alt text / image description (Optional)"
                       className="w-full px-3 py-2 bg-white border border-slate-200 focus:border-sky-600 rounded-lg text-xs font-medium outline-none"
                     />
                   </div>
@@ -607,7 +612,15 @@ export const AdminProductForm = () => {
                   {/* Image Preview Box */}
                   <div className="h-20 w-full sm:w-20 bg-white rounded-lg border border-slate-200 p-1 flex items-center justify-center overflow-hidden shrink-0 mx-auto">
                     {img.url ? (
-                      <img src={img.url} alt={img.alt || 'Preview'} className="w-full h-full object-contain" />
+                      <img
+                        src={img.url}
+                        alt={img.alt || 'Preview'}
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = 'https://via.placeholder.com/150?text=Invalid+URL';
+                        }}
+                      />
                     ) : (
                       <span className="text-[10px] text-slate-400 font-medium">No Preview</span>
                     )}
@@ -1133,12 +1146,12 @@ export const AdminProductForm = () => {
             {isSubmitting ? (
               <>
                 <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Saving Product...</span>
+                <span>{isEditMode ? 'Updating Product...' : 'Publishing Product...'}</span>
               </>
             ) : (
               <>
                 <Save className="w-4 h-4" />
-                <span>{isEditMode ? 'Update Product' : 'Create Product'}</span>
+                <span>{isEditMode ? 'Update Product' : 'Publish Product'}</span>
               </>
             )}
           </button>

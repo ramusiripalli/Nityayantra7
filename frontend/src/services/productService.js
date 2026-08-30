@@ -1,4 +1,5 @@
 import { MOCK_PRODUCTS } from '../data/mockProducts';
+import api from './api';
 
 /**
  * Service abstraction for product API calls & search.
@@ -9,6 +10,17 @@ export const productService = {
    * Get all products with multi-faceted filtering & sorting
    */
   async getProducts(params = {}) {
+    try {
+      const response = await api.get('/products', { params });
+      if (response && response.data && Array.isArray(response.data.products)) {
+        return response.data.products;
+      } else if (response && Array.isArray(response.data)) {
+        return response.data;
+      }
+    } catch (err) {
+      // Fallback to local mock data if backend unavailable
+    }
+
     return new Promise((resolve) => {
       let filtered = [...MOCK_PRODUCTS];
 
@@ -124,17 +136,24 @@ export const productService = {
   },
 
   /**
-   * Get product by ID or Slug
+   * Get product by ID or Slug (tries backend MongoDB API first, then mock fallback)
    */
   async getProductById(id) {
+    try {
+      const response = await api.get(`/products/${id}`);
+      if (response && response.data) {
+        return response.data;
+      }
+    } catch (err) {
+      // Backend request failed or returned 404, fallback to local mock search
+    }
+
     return new Promise((resolve, reject) => {
       const product = MOCK_PRODUCTS.find(
-        (p) => String(p.id) === String(id) || p.slug === String(id)
+        (p) => String(p.id) === String(id) || p.slug === String(id) || String(p._id) === String(id)
       );
-      setTimeout(() => {
-        if (product) resolve(product);
-        else reject(new Error('Product not found'));
-      }, 50);
+      if (product) resolve(product);
+      else reject(new Error('Product not found'));
     });
   },
 
