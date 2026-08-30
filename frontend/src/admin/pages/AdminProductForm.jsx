@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -14,6 +14,7 @@ import {
   Percent
 } from 'lucide-react';
 import api from '../../services/api';
+import collectionService from '../../services/collectionService';
 import LoadingState from '../components/LoadingState';
 
 const SUPPORTED_MARKETPLACES = [
@@ -30,6 +31,7 @@ export const AdminProductForm = () => {
   const isEditMode = Boolean(id);
 
   const [categories, setCategories] = useState([]);
+  const [allCollections, setAllCollections] = useState([]);
   const [isLoading, setIsLoading] = useState(isEditMode);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -41,6 +43,7 @@ export const AdminProductForm = () => {
     name: '',
     slug: '',
     category: '',
+    collectionId: '',
     shortDescription: '',
     description: '',
     images: [{ url: '', alt: '' }],
@@ -60,17 +63,30 @@ export const AdminProductForm = () => {
     isPublished: true,
   });
 
-  // Fetch real categories and product data (if editing)
+  // Dynamic collections filtered by selected category
+  const filteredCollections = useMemo(() => {
+    if (!formData.category) return [];
+    return allCollections.filter((col) => {
+      const colCatId = col.category?._id || col.category?.id || col.category;
+      return String(colCatId) === String(formData.category);
+    });
+  }, [allCollections, formData.category]);
+
+  // Fetch real categories, collections, and product data (if editing)
   useEffect(() => {
     const loadInitialData = async () => {
       setIsLoading(true);
       setError('');
 
       try {
-        // Fetch real active categories from MongoDB
-        const catsRes = await api.get('/categories?isActive=true');
+        // Fetch real active categories and collections from MongoDB
+        const [catsRes, colsRes] = await Promise.all([
+          api.get('/categories?isActive=true'),
+          collectionService.getPublicCollections(),
+        ]);
         const activeCats = catsRes.data || [];
         setCategories(activeCats);
+        setAllCollections(colsRes || []);
 
         if (!isEditMode && activeCats.length > 0) {
           setFormData((prev) => ({ ...prev, category: activeCats[0]._id || activeCats[0].id }));
@@ -87,6 +103,7 @@ export const AdminProductForm = () => {
               name: prod.name || '',
               slug: prod.slug || '',
               category: prod.category?._id || prod.category || '',
+              collectionId: prod.collectionId?._id || prod.collectionId || '',
               shortDescription: prod.shortDescription || '',
               description: prod.description || '',
               images: prod.images && prod.images.length > 0 
@@ -246,6 +263,10 @@ export const AdminProductForm = () => {
       setError('Please select a Category.');
       return;
     }
+    if (!formData.collectionId) {
+      setError('Please select a Subcategory / Collection for this product.');
+      return;
+    }
     if (!formData.images[0]?.url?.trim()) {
       setError('Primary Product Image URL is required.');
       return;
@@ -293,6 +314,7 @@ export const AdminProductForm = () => {
         name: formData.name.trim(),
         slug: formData.slug.trim() || formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         category: formData.category,
+        collectionId: formData.collectionId,
         shortDescription: formData.shortDescription.trim(),
         description: formData.description.trim() || formData.shortDescription.trim() || formData.name.trim(),
         images: formData.images
@@ -444,7 +466,13 @@ export const AdminProductForm = () => {
               </label>
               <select
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    category: e.target.value,
+                    collectionId: '', // Reset collection when category changes
+                  }))
+                }
                 className="w-full text-xs font-bold px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors cursor-pointer"
                 required
               >
@@ -455,6 +483,35 @@ export const AdminProductForm = () => {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Dynamic Subcategory / Collection Dropdown */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700">
+                Subcategory / Collection <span className="text-rose-500">*</span>
+              </label>
+              <select
+                value={formData.collectionId}
+                onChange={(e) => setFormData({ ...formData, collectionId: e.target.value })}
+                className="w-full text-xs font-bold px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors cursor-pointer"
+                required
+              >
+                <option value="">
+                  {filteredCollections.length === 0
+                    ? '-- No Collections for this Category --'
+                    : '-- Select Subcategory / Collection --'}
+                </option>
+                {filteredCollections.map((col) => (
+                  <option key={col._id || col.id} value={col._id || col.id}>
+                    {col.icon ? `${col.icon} ` : ''}{col.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-[11px] text-slate-400">
+                Dynamic: only collections belonging to{' '}
+                {categories.find((c) => (c._id || c.id) === formData.category)?.name || 'selected category'}{' '}
+                appear here.
+              </p>
             </div>
 
             {/* Short Description */}

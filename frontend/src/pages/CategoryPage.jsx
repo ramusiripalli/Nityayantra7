@@ -1,141 +1,122 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import PageContainer from '../components/common/PageContainer';
-import ProductGrid from '../components/product/ProductGrid';
-import { productService } from '../services/productService';
+import CollectionCard from '../components/collection/CollectionCard';
 import { categoryService } from '../services/categoryService';
-import { ChevronRight, FolderX, ArrowRight } from 'lucide-react';
+import collectionService from '../services/collectionService';
+import { ChevronRight, Layers, Sparkles } from 'lucide-react';
 
-export const CategoryPage = () => {
-  const { slug } = useParams();
+export const CategoryPage = ({ categorySlug: propCategorySlug }) => {
+  const params = useParams();
+  const slug = propCategorySlug || params.slug;
+
   const [categories, setCategories] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState('featured');
 
-  // Load real active categories from MongoDB
+  // Load real categories
   useEffect(() => {
     categoryService.getCategories().then((cats) => setCategories(cats || []));
   }, []);
 
-  // Find matching category metadata from real categories
+  // Find matching category metadata
   const categoryMeta = useMemo(() => {
     const found = categories.find(
-      (c) => (c.slug || '').toLowerCase() === slug?.toLowerCase() ||
-             (c.name || '').toLowerCase().replace(/\s+/g, '-') === slug?.toLowerCase()
+      (c) =>
+        (c.slug || '').toLowerCase() === slug?.toLowerCase() ||
+        (c.name || '').toLowerCase().replace(/\s+/g, '-') === slug?.toLowerCase()
     );
     if (found) return found;
-    if (slug === 'deals') return { name: 'Deals', slug: 'deals', icon: 'Tag' };
-    return { 
-      name: slug ? slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Category', 
-      slug, 
-      icon: 'Tag' 
+    return {
+      name: slug ? slug.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()) : 'Category',
+      slug,
     };
   }, [categories, slug]);
 
-  // Fetch products for category
+  // Fetch collections for this category
   useEffect(() => {
-    async function fetchCategoryProducts() {
+    async function fetchCategoryCollections() {
+      if (!slug) return;
       setLoading(true);
       try {
-        const data = await productService.getProducts({ category: slug });
-        setProducts(data);
+        const colData = await collectionService.getPublicCollections({ category: slug });
+        setCollections(Array.isArray(colData) ? colData : []);
       } catch (err) {
-        console.error('Error fetching category products:', err);
-        setProducts([]);
+        console.error('Error fetching category collections:', err);
+        setCollections([]);
       } finally {
         setLoading(false);
       }
     }
-    fetchCategoryProducts();
+
+    fetchCategoryCollections();
     window.scrollTo(0, 0);
   }, [slug]);
 
-  // Sort products based on simple sort dropdown
-  const sortedProducts = useMemo(() => {
-    const list = [...products];
-    const getPrice = (p) => p.lowestPrice || p.currentPrice || p.marketplaceOffers?.[0]?.price || 0;
-
-    if (sortBy === 'price_low') {
-      list.sort((a, b) => getPrice(a) - getPrice(b));
-    } else if (sortBy === 'newest') {
-      list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-    } else if (sortBy === 'featured') {
-      list.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
-    }
-    return list;
-  }, [products, sortBy]);
-
-  // Category Not Found State
-  if (!categoryMeta) {
-    return (
-      <PageContainer className="pt-3">
-        <nav className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-3">
-          <Link to="/" className="hover:text-sky-600">Home</Link>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-slate-900 capitalize font-bold">{slug}</span>
-        </nav>
-
-        <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-white rounded-3xl border border-slate-200 shadow-2xs space-y-4 my-4">
-          <div className="p-4 rounded-full bg-amber-50 text-amber-600 border border-amber-200">
-            <FolderX className="w-12 h-12" />
-          </div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900">Category Not Found</h1>
-          <p className="text-xs text-slate-500 max-w-md">
-            The category <strong className="text-slate-800">"{slug}"</strong> was not found.
-          </p>
-          <Link
-            to="/products"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl shadow-2xs transition-colors"
-          >
-            <span>View All Products</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </PageContainer>
-    );
-  }
-
   return (
-    <PageContainer className="pt-2.5 pb-16">
+    <PageContainer className="pt-3 pb-16 space-y-6">
       
-      {/* 1. Ultra-Compact Category Title & Count (No giant banners, no wasted vertical space) */}
-      <div className="flex items-center justify-between pb-2.5 border-b border-slate-200 mb-5">
-        <div className="flex items-baseline gap-2">
-          <h1 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 overflow-x-auto whitespace-nowrap">
+        <Link to="/" className="hover:text-sky-600">Home</Link>
+        <ChevronRight className="w-3 h-3 shrink-0" />
+        <span className="text-slate-900 font-bold">{categoryMeta.name}</span>
+      </nav>
+
+      {/* Category Header */}
+      <div className="border-b border-slate-200 pb-4 space-y-1">
+        <div className="flex items-center gap-2">
+          <span className="p-1.5 rounded-lg bg-sky-50 text-sky-600">
+            <Layers className="w-4 h-4" />
+          </span>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-tight">
             {categoryMeta.name}
           </h1>
-          <span className="text-xs font-semibold text-slate-400">
-            • {sortedProducts.length} {sortedProducts.length === 1 ? 'product' : 'products'}
-          </span>
         </div>
+        <p className="text-xs text-slate-500 font-medium">
+          Choose a collection to browse curated products and direct marketplace deals.
+        </p>
+      </div>
 
-        {/* Simple Sort Dropdown */}
-        {sortedProducts.length > 1 && (
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className="font-semibold text-slate-400 hidden sm:inline">Sort:</span>
-            <select
-              value={sortBy}
-              aria-label="Sort category products"
-              onChange={(e) => setSortBy(e.target.value)}
-              className="font-bold bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-sky-500 cursor-pointer text-slate-800"
+      {/* Zepto-Style Compact Collection Grid (2 cols mobile, 3-6 cols desktop) */}
+      {loading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+          {[1, 2, 3, 4, 5, 6].map((idx) => (
+            <div
+              key={idx}
+              className="aspect-[4/5] bg-slate-100 animate-pulse rounded-2xl border border-slate-200"
+            />
+          ))}
+        </div>
+      ) : collections.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+          {collections.map((col) => (
+            <CollectionCard
+              key={col._id || col.id || col.slug}
+              collection={col}
+              categorySlug={categoryMeta.slug}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-16 px-4 bg-white rounded-3xl border border-slate-200 shadow-2xs space-y-3">
+          <Layers className="w-10 h-10 text-slate-300 mx-auto" />
+          <h2 className="text-sm sm:text-base font-bold text-slate-800">
+            No collections available in {categoryMeta.name} yet
+          </h2>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            We are continuously adding verified product collections. Check back shortly!
+          </p>
+          <div className="pt-2">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 hover:text-sky-700 underline"
             >
-              <option value="featured">Featured</option>
-              <option value="price_low">Lowest Price</option>
-              <option value="newest">Newest</option>
-            </select>
+              ← Back to Homepage
+            </Link>
           </div>
-        )}
-      </div>
-
-      {/* 2. Responsive Product Grid (1 per row mobile, 2 tablet, 3-4 desktop) */}
-      <div className="w-full">
-        <ProductGrid 
-          products={sortedProducts} 
-          isLoading={loading} 
-          emptyMessage="No products available in this category yet."
-        />
-      </div>
+        </div>
+      )}
 
     </PageContainer>
   );

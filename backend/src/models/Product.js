@@ -111,6 +111,13 @@ const productSchema = new mongoose.Schema(
       index: true,
     },
 
+    // Subcategory / Collection Relationship (ObjectId Reference)
+    collectionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Collection',
+      index: true,
+    },
+
     // Images List
     images: {
       type: [productImageSchema],

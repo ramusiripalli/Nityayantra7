@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Package,
   Tags,
+  Layers,
   Settings,
   LogOut,
   X,
@@ -24,6 +25,7 @@ export const AdminSidebar = ({ isMobileOpen, onCloseMobile }) => {
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard, end: true },
     { name: 'Products', path: '/admin/products', icon: Package },
     { name: 'Categories', path: '/admin/categories', icon: Tags },
+    { name: 'Collections', path: '/admin/collections', icon: Layers },
   ];
 
   const sidebarContent = (

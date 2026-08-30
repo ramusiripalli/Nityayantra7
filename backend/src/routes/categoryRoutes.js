@@ -31,4 +31,17 @@ router.route('/:id')
 router.route('/:slug/products')
   .get(getCategoryProducts);
 
+// Category Subcategories/Collections Endpoint (Public)
+import { getPublicCollections } from '../controllers/collectionController.js';
+router.route('/:category/subcategories')
+  .get((req, res, next) => {
+    req.query.category = req.params.category;
+    return getPublicCollections(req, res, next);
+  });
+router.route('/:category/collections')
+  .get((req, res, next) => {
+    req.query.category = req.params.category;
+    return getPublicCollections(req, res, next);
+  });
+
 export default router;

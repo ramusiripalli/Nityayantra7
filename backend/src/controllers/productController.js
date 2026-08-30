@@ -1,5 +1,6 @@
 import Product from '../models/Product.js';
 import Category from '../models/Category.js';
+import Collection from '../models/Collection.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import mongoose from 'mongoose';
 
@@ -88,16 +89,36 @@ export const getProducts = asyncHandler(async (req, res) => {
       } else {
         return res.status(200).json({
           success: true,
+          count: 0,
+          total: 0,
+          page: 1,
+          pages: 0,
           data: {
             products: [],
-            pagination: { page, limit, total: 0, totalPages: 0 }
+            pagination: { page: 1, limit: 12, total: 0, pages: 0 },
+            filters: { category: null }
           }
         });
       }
     }
   }
 
-  // 4. Exact numeric Product ID search OR Text Search
+  // 3b. Collection / Subcategory Filter (by slug or ObjectId)
+  if (req.query.collection && req.query.collection !== 'all') {
+    const colParam = req.query.collection.toLowerCase().trim();
+    const colDoc = mongoose.Types.ObjectId.isValid(colParam)
+      ? await Collection.findById(colParam)
+      : await Collection.findOne({ slug: colParam });
+
+    if (colDoc) {
+      query.$or = [
+        { collectionId: colDoc._id },
+        { _id: { $in: colDoc.products || [] } }
+      ];
+    }
+  }
+
+  // 4. Exact numeric Product ID search OR Full Text/Category/Collection Search
   if (search && search.trim() !== '') {
     const trimmed = search.trim();
     const isPureNumeric = /^\d+$/.test(trimmed);
@@ -109,12 +130,32 @@ export const getProducts = asyncHandler(async (req, res) => {
       ];
     } else {
       const searchRegex = new RegExp(trimmed, 'i');
-      query.$or = [
+      const orConditions = [
         { name: searchRegex },
         { description: searchRegex },
         { keyFeatures: searchRegex },
         { shortDescription: searchRegex }
       ];
+
+      // Match category names
+      const matchingCats = await Category.find({ name: searchRegex }, { _id: 1 });
+      if (matchingCats.length > 0) {
+        orConditions.push({ category: { $in: matchingCats.map((c) => c._id) } });
+      }
+
+      // Match collection names
+      const matchingCollections = await Collection.find(
+        { name: searchRegex, isPublished: true },
+        { products: 1 }
+      );
+      if (matchingCollections.length > 0) {
+        const collectionProductIds = matchingCollections.flatMap((c) => c.products || []);
+        if (collectionProductIds.length > 0) {
+          orConditions.push({ _id: { $in: collectionProductIds } });
+        }
+      }
+
+      query.$or = orConditions;
     }
   }
 
@@ -149,6 +190,7 @@ export const getProducts = asyncHandler(async (req, res) => {
   const total = await Product.countDocuments(query);
   const products = await Product.find(query)
     .populate('category', '_id name slug icon')
+    .populate('collectionId', '_id name slug image icon')
     .sort(sortOption)
     .skip(skip)
     .limit(limit);
@@ -177,8 +219,8 @@ export const getProductById = asyncHandler(async (req, res) => {
   const isObjectId = mongoose.Types.ObjectId.isValid(id);
 
   const product = isObjectId
-    ? await Product.findById(id).populate('category', '_id name slug icon')
-    : await Product.findOne({ slug: id.toLowerCase() }).populate('category', '_id name slug icon');
+    ? await Product.findById(id).populate('category', '_id name slug icon').populate('collectionId', '_id name slug image icon')
+    : await Product.findOne({ slug: id.toLowerCase() }).populate('category', '_id name slug icon').populate('collectionId', '_id name slug image icon');
 
   if (!product) {
     res.status(404);
@@ -203,6 +245,7 @@ export const createProduct = asyncHandler(async (req, res) => {
     description,
     shortDescription,
     category,
+    collectionId,
     images,
     videos,
     marketplaceOffers,
@@ -303,6 +346,7 @@ export const createProduct = asyncHandler(async (req, res) => {
     description: description.trim(),
     shortDescription: shortDescription ? shortDescription.trim() : '',
     category: categoryDoc._id,
+    collectionId: collectionId && mongoose.Types.ObjectId.isValid(collectionId) ? collectionId : undefined,
     images,
     videos: formattedVideos,
     marketplaceOffers,
@@ -320,7 +364,16 @@ export const createProduct = asyncHandler(async (req, res) => {
     isActive: isActive !== undefined ? isActive : true
   });
 
-  const populatedProduct = await Product.findById(product._id).populate('category', '_id name slug icon');
+  // If assigned to a collection, ensure product ID is in collection.products
+  if (collectionId && mongoose.Types.ObjectId.isValid(collectionId)) {
+    await Collection.findByIdAndUpdate(collectionId, {
+      $addToSet: { products: product._id }
+    });
+  }
+
+  const populatedProduct = await Product.findById(product._id)
+    .populate('category', '_id name slug icon')
+    .populate('collectionId', '_id name slug image icon');
 
   res.status(201).json({
     success: true,
@@ -401,10 +454,24 @@ export const updateProduct = asyncHandler(async (req, res) => {
     req.body.discountPercent = calculateHighestDiscount(req.body.marketplaceOffers);
   }
 
+  // Handle collectionId update
+  if (req.body.collectionId !== undefined) {
+    if (req.body.collectionId && mongoose.Types.ObjectId.isValid(req.body.collectionId)) {
+      product.collectionId = req.body.collectionId;
+      await Collection.findByIdAndUpdate(req.body.collectionId, {
+        $addToSet: { products: product._id }
+      });
+    } else {
+      product.collectionId = undefined;
+    }
+  }
+
   // Update fields
   Object.assign(product, req.body);
   const updatedProduct = await product.save();
-  const populated = await Product.findById(updatedProduct._id).populate('category', '_id name slug icon');
+  const populated = await Product.findById(updatedProduct._id)
+    .populate('category', '_id name slug icon')
+    .populate('collectionId', '_id name slug image icon');
 
   res.status(200).json({
     success: true,

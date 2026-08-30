@@ -6,6 +6,7 @@ import healthRoutes from './routes/healthRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import productRoutes from './routes/productRoutes.js';
+import collectionRoutes from './routes/collectionRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
 // Load Environment Variables
@@ -42,6 +43,8 @@ app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/collections', collectionRoutes);
+app.use('/api/subcategories', collectionRoutes);
 
 // Error Handling Middleware
 app.use(notFound);

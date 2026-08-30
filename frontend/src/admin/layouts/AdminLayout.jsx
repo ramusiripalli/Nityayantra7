@@ -12,6 +12,7 @@ export const AdminLayout = () => {
     if (path === '/admin') return 'Dashboard';
     if (path.startsWith('/admin/products')) return 'Products Management';
     if (path.startsWith('/admin/categories')) return 'Categories Management';
+    if (path.startsWith('/admin/collections')) return 'Collections Management';
     if (path.startsWith('/admin/settings')) return 'Settings';
     return 'Admin';
   };
