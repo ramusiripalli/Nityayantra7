@@ -214,13 +214,85 @@ export const getProducts = asyncHandler(async (req, res) => {
  * @route   GET /api/products/:id
  * @access  Public
  */
+export const searchProducts = asyncHandler(async (req, res) => {
+  const q = req.query.q || req.query.search || '';
+  if (!q.trim()) {
+    return res.status(200).json({ success: true, count: 0, data: [] });
+  }
+
+  const queryTerm = q.trim();
+  const isNumeric = !isNaN(Number(queryTerm)) && !isNaN(parseInt(queryTerm, 10));
+
+  const orConditions = [
+    { name: { $regex: queryTerm, $options: 'i' } },
+    { slug: { $regex: queryTerm, $options: 'i' } },
+    { description: { $regex: queryTerm, $options: 'i' } },
+    { shortDescription: { $regex: queryTerm, $options: 'i' } },
+  ];
+
+  if (isNumeric) {
+    orConditions.push({ productId: Number(queryTerm) });
+  }
+
+  const matchingCats = await Category.find({
+    $or: [{ name: new RegExp(queryTerm, 'i') }, { slug: new RegExp(queryTerm, 'i') }],
+  });
+  if (matchingCats.length > 0) {
+    orConditions.push({ category: { $in: matchingCats.map((c) => c._id) } });
+  }
+
+  const matchingCols = await Collection.find({
+    $or: [{ name: new RegExp(queryTerm, 'i') }, { slug: new RegExp(queryTerm, 'i') }],
+  });
+  if (matchingCols.length > 0) {
+    orConditions.push({ collectionId: { $in: matchingCols.map((c) => c._id) } });
+  }
+
+  const products = await Product.find({
+    $or: orConditions,
+    isPublished: true,
+    isActive: true,
+  })
+    .populate('category', '_id name slug icon')
+    .populate('collectionId', '_id name slug image icon')
+    .limit(20);
+
+  res.status(200).json({
+    success: true,
+    count: products.length,
+    data: products,
+  });
+});
+
+/**
+ * @desc    Get single product by ID, numeric productNumber, or slug
+ * @route   GET /api/products/:id
+ * @access  Public
+ */
 export const getProductById = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const isObjectId = mongoose.Types.ObjectId.isValid(id);
+  const isNumeric = !isNaN(Number(id)) && !isNaN(parseInt(id, 10));
 
-  const product = isObjectId
-    ? await Product.findById(id).populate('category', '_id name slug icon').populate('collectionId', '_id name slug image icon')
-    : await Product.findOne({ slug: id.toLowerCase() }).populate('category', '_id name slug icon').populate('collectionId', '_id name slug image icon');
+  let product = null;
+
+  if (isObjectId) {
+    product = await Product.findById(id)
+      .populate('category', '_id name slug icon')
+      .populate('collectionId', '_id name slug image icon');
+  }
+
+  if (!product && isNumeric) {
+    product = await Product.findOne({ productId: Number(id) })
+      .populate('category', '_id name slug icon')
+      .populate('collectionId', '_id name slug image icon');
+  }
+
+  if (!product) {
+    product = await Product.findOne({ slug: id.toLowerCase() })
+      .populate('category', '_id name slug icon')
+      .populate('collectionId', '_id name slug image icon');
+  }
 
   if (!product) {
     res.status(404);

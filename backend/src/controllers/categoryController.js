@@ -82,9 +82,18 @@ export const getCategoryById = asyncHandler(async (req, res) => {
     throw new Error('Category not found');
   }
 
+  const collections = await Collection.find({
+    category: category._id,
+    isPublished: true,
+  }).select('_id name slug image icon isFeatured products');
+
   res.status(200).json({
     success: true,
-    data: category,
+    data: {
+      ...category.toObject(),
+      collectionCount: collections.length,
+      collections,
+    },
   });
 });
 
