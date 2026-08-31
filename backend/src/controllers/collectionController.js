@@ -20,7 +20,8 @@ export const createCollection = asyncHandler(async (req, res) => {
     seoTitle, 
     seoDescription, 
     products = [], 
-    isPublished = true 
+    isPublished = true,
+    isFeatured = false 
   } = req.body;
 
   if (!name || !name.trim()) {
@@ -95,6 +96,7 @@ export const createCollection = asyncHandler(async (req, res) => {
       : `Discover our curated selection of ${name.trim()} with real marketplace prices.`,
     products,
     isPublished: Boolean(isPublished),
+    isFeatured: Boolean(isFeatured),
   });
 
   // Sync collectionId on assigned products
@@ -117,11 +119,15 @@ export const createCollection = asyncHandler(async (req, res) => {
  * @access  Private (Admin)
  */
 export const getCollections = asyncHandler(async (req, res) => {
-  const { search, published, category } = req.query;
+  const { search, published, category, featured } = req.query;
   const filter = {};
 
   if (published !== undefined) {
     filter.isPublished = published === 'true';
+  }
+
+  if (featured !== undefined) {
+    filter.isFeatured = featured === 'true';
   }
 
   if (search && search.trim()) {
@@ -196,7 +202,8 @@ export const updateCollection = asyncHandler(async (req, res) => {
     seoTitle, 
     seoDescription, 
     products, 
-    isPublished 
+    isPublished,
+    isFeatured 
   } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -209,6 +216,8 @@ export const updateCollection = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error('Collection not found');
   }
+
+  if (isFeatured !== undefined) collection.isFeatured = Boolean(isFeatured);
 
   if (slug && slug.trim()) {
     const cleanSlug = slug.toLowerCase().trim();
@@ -337,8 +346,12 @@ export const deleteCollection = asyncHandler(async (req, res) => {
  * @access  Public
  */
 export const getPublicCollections = asyncHandler(async (req, res) => {
-  const { category } = req.query;
+  const { category, featured } = req.query;
   const filter = { isPublished: true };
+
+  if (featured !== undefined) {
+    filter.isFeatured = featured === 'true';
+  }
 
   if (category) {
     if (mongoose.Types.ObjectId.isValid(category)) {
@@ -382,6 +395,7 @@ export const getPublicCollections = asyncHandler(async (req, res) => {
         icon: col.icon || '🍟',
         category: col.category,
         productCount: count,
+        isFeatured: Boolean(col.isFeatured),
       };
     })
   );

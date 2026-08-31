@@ -48,6 +48,7 @@ export const AdminCollectionForm = () => {
     seoTitle: '',
     seoDescription: '',
     isPublished: true,
+    isFeatured: false,
   });
 
   // Ordered list of selected product objects
@@ -84,6 +85,7 @@ export const AdminCollectionForm = () => {
               seoTitle: col.seoTitle || '',
               seoDescription: col.seoDescription || '',
               isPublished: col.isPublished !== undefined ? col.isPublished : true,
+              isFeatured: col.isFeatured !== undefined ? col.isFeatured : false,
             });
 
             if (col.products && Array.isArray(col.products)) {
@@ -210,6 +212,7 @@ export const AdminCollectionForm = () => {
         seoDescription: formData.seoDescription.trim() || `Discover our curated selection of ${formData.name.trim()}.`,
         products: selectedProducts.map((p) => p._id || p.id),
         isPublished: Boolean(formData.isPublished),
+        isFeatured: Boolean(formData.isFeatured),
       };
 
       if (isEditMode) {
@@ -635,8 +638,8 @@ export const AdminCollectionForm = () => {
           </div>
         </div>
 
-        {/* SECTION 4: PUBLISHED STATUS */}
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-2xs">
+        {/* SECTION 4: PUBLISHED & FEATURED STATUS */}
+        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
           <label className="inline-flex items-center gap-3 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -654,6 +657,25 @@ export const AdminCollectionForm = () => {
               </p>
             </div>
           </label>
+
+          <div className="border-t border-slate-100 pt-3">
+            <label className="inline-flex items-center gap-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={formData.isFeatured}
+                onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                className="w-5 h-5 rounded border-slate-300 text-sky-600 focus:ring-sky-500 cursor-pointer"
+              />
+              <div>
+                <p className="text-xs font-bold text-slate-900">
+                  Featured Collection (Show in "Popular Collections" on Homepage)
+                </p>
+                <p className="text-[11px] text-slate-400">
+                  Only explicitly featured collections will appear on the homepage popular collections grid.
+                </p>
+              </div>
+            </label>
+          </div>
         </div>
 
         {/* Action Bar */}

@@ -1,5 +1,6 @@
 import Category from '../models/Category.js';
 import Product from '../models/Product.js';
+import Collection from '../models/Collection.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import mongoose from 'mongoose';
 
@@ -39,13 +40,27 @@ export const getCategories = asyncHandler(async (req, res) => {
   // Fetch matching categories sorted alphabetically by name
   const categories = await Category.find(filter).sort({ name: 1 });
 
+  // Attach real published collection counts
+  const categoriesWithCounts = await Promise.all(
+    categories.map(async (cat) => {
+      const collectionCount = await Collection.countDocuments({
+        category: cat._id,
+        isPublished: true,
+      });
+      return {
+        ...cat.toObject(),
+        collectionCount,
+      };
+    })
+  );
+
   res.status(200).json({
     success: true,
-    count: categories.length,
+    count: categoriesWithCounts.length,
     total,
     activeCount,
     inactiveCount,
-    data: categories,
+    data: categoriesWithCounts,
   });
 });
 

@@ -64,13 +64,14 @@ export const CategoryNavigation = ({ onSelectCategory }) => {
   // Determine current active category from path
   const currentCategory = React.useMemo(() => {
     const path = location.pathname;
-    if (path.startsWith('/category/')) {
-      return path.replace('/category/', '');
-    }
     if (path === '/products') {
       return 'all';
     }
-    return '';
+    if (path.startsWith('/category/')) {
+      return path.replace('/category/', '');
+    }
+    const segments = path.replace(/^\//, '').split('/');
+    return segments[0] || '';
   }, [location.pathname]);
 
   // Check scroll position to display navigation arrows
@@ -105,7 +106,7 @@ export const CategoryNavigation = ({ onSelectCategory }) => {
       if (category.slug === 'all') {
         navigate('/products');
       } else {
-        navigate(`/category/${category.slug}`);
+        navigate(`/${category.slug}`);
       }
     }
   };

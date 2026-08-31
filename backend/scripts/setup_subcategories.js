@@ -17,7 +17,7 @@ async function setupSubcategories() {
     process.exit(1);
   }
 
-  // 1. Update Air Fryers collection with image and category
+  // 1. Update Air Fryers collection with image, category, and isFeatured=true
   let airFryers = await Collection.findOne({ slug: 'air-fryers' });
   if (!airFryers) {
     airFryers = await Collection.create({
@@ -28,17 +28,19 @@ async function setupSubcategories() {
       icon: '🍟',
       description: 'Find the right air fryer for everyday healthy cooking.',
       isPublished: true,
+      isFeatured: true,
     });
   } else {
     airFryers.image = 'https://m.media-amazon.com/images/I/51wXUqH7E8L._SX679_.jpg';
     airFryers.category = kitchen._id;
     airFryers.icon = '🍟';
     airFryers.isPublished = true;
+    airFryers.isFeatured = true;
     await airFryers.save();
   }
-  console.log('Air Fryers collection updated:', airFryers.slug);
+  console.log('Air Fryers collection updated (isFeatured: true):', airFryers.slug);
 
-  // 2. Create or Update Mixer Grinders collection
+  // 2. Create or Update Mixer Grinders collection (isFeatured: false to verify selective homepage display)
   let mixerGrinders = await Collection.findOne({ slug: 'mixer-grinders' });
   if (!mixerGrinders) {
     mixerGrinders = await Collection.create({
@@ -49,6 +51,7 @@ async function setupSubcategories() {
       icon: '⚙️',
       description: 'Heavy duty mixer grinders for versatile Indian cooking.',
       isPublished: true,
+      isFeatured: false,
       products: [],
     });
   } else {
@@ -56,9 +59,10 @@ async function setupSubcategories() {
     mixerGrinders.category = kitchen._id;
     mixerGrinders.icon = '⚙️';
     mixerGrinders.isPublished = true;
+    mixerGrinders.isFeatured = false;
     await mixerGrinders.save();
   }
-  console.log('Mixer Grinders collection updated:', mixerGrinders.slug);
+  console.log('Mixer Grinders collection updated (isFeatured: false):', mixerGrinders.slug);
 
   // 3. Link 3 Air Fryer products to Air Fryers collection
   const airFryerProducts = await Product.find({
@@ -71,6 +75,10 @@ async function setupSubcategories() {
     p.category = kitchen._id;
     p.isPublished = true;
     p.isActive = true;
+    if (p.productId === 1) {
+      p.isFeatured = true;
+      p.isTrending = true;
+    }
     await p.save();
     pIds.push(p._id);
   }

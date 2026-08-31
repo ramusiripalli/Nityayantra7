@@ -1,94 +1,87 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageContainer from '../components/common/PageContainer';
-import ProductGrid from '../components/product/ProductGrid';
-import { productService } from '../services/productService';
-import { ChevronRight } from 'lucide-react';
+import CategoryCard from '../components/category/CategoryCard';
+import { categoryService } from '../services/categoryService';
+import { ChevronRight, LayoutGrid } from 'lucide-react';
 
 export const ProductsPage = () => {
-  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState('featured');
 
-  // Fetch product dataset directly from MongoDB
+  // Fetch real categories directly from MongoDB
   useEffect(() => {
-    async function fetchProducts() {
+    async function loadCategories() {
       setLoading(true);
       try {
-        const data = await productService.getProducts({});
-        setProducts(data);
+        const data = await categoryService.getCategories();
+        setCategories(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error('Error fetching products:', err);
-        setProducts([]);
+        console.error('Error fetching categories directory:', err);
+        setCategories([]);
       } finally {
         setLoading(false);
       }
     }
-    fetchProducts();
+    loadCategories();
+    window.scrollTo(0, 0);
   }, []);
 
-  // Sort products based on simple sort dropdown
-  const sortedProducts = useMemo(() => {
-    const list = [...products];
-    const getPrice = (p) => p.lowestPrice || p.currentPrice || p.marketplaceOffers?.[0]?.price || 0;
-
-    if (sortBy === 'price_low') {
-      list.sort((a, b) => getPrice(a) - getPrice(b));
-    } else if (sortBy === 'newest') {
-      list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-    } else if (sortBy === 'featured') {
-      list.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
-    }
-    return list;
-  }, [products, sortBy]);
-
   return (
-    <PageContainer className="pt-3 pb-16">
+    <PageContainer className="pt-3 pb-16 space-y-6">
       
-      {/* 1. Breadcrumb: Home > All Products */}
-      <nav className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-3">
+      {/* 1. Breadcrumb: Home > All Categories */}
+      <nav className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
         <Link to="/" className="hover:text-sky-600">Home</Link>
         <ChevronRight className="w-3 h-3" />
-        <span className="text-slate-900 font-bold">All Products</span>
+        <span className="text-slate-900 font-bold">All Categories</span>
       </nav>
 
-      {/* 2. Compact Page Header */}
-      <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-6">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-            All Products
+      {/* 2. Directory Header */}
+      <div className="border-b border-slate-200 pb-4 space-y-1">
+        <div className="flex items-center gap-2">
+          <span className="p-1.5 rounded-lg bg-sky-50 text-sky-600">
+            <LayoutGrid className="w-5 h-5" />
+          </span>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight uppercase">
+            All Categories
           </h1>
-          <p className="text-xs font-semibold text-slate-500 mt-0.5">
-            {sortedProducts.length} {sortedProducts.length === 1 ? 'product found' : 'products found'}
+        </div>
+        <p className="text-xs sm:text-sm text-slate-500 font-medium">
+          Explore products by category and discover useful collections.
+        </p>
+      </div>
+
+      {/* 3. Zepto-Style Compact Category Tiles Grid (2 cols mobile, 3-6 cols desktop) */}
+      {loading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+          {[1, 2, 3, 4, 5, 6].map((idx) => (
+            <div
+              key={idx}
+              className="aspect-[4/5] bg-slate-100 animate-pulse rounded-2xl border border-slate-200"
+            />
+          ))}
+        </div>
+      ) : categories.length === 0 ? (
+        <div className="text-center py-16 px-4 bg-white rounded-3xl border border-slate-200 shadow-2xs space-y-3">
+          <LayoutGrid className="w-10 h-10 text-slate-300 mx-auto" />
+          <h2 className="text-sm sm:text-base font-bold text-slate-800">
+            No categories available yet
+          </h2>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            Categories and curated collections will appear here once published.
           </p>
         </div>
-
-        {/* Simple Sort Dropdown */}
-        {sortedProducts.length > 1 && (
-          <div className="flex items-center gap-2 text-xs">
-            <span className="font-bold text-slate-400 hidden sm:inline">Sort:</span>
-            <select
-              value={sortBy}
-              aria-label="Sort all products"
-              onChange={(e) => setSortBy(e.target.value)}
-              className="font-bold bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer text-xs text-slate-800"
-            >
-              <option value="featured">Featured</option>
-              <option value="price_low">Lowest Price</option>
-              <option value="newest">Newest</option>
-            </select>
-          </div>
-        )}
-      </div>
-
-      {/* 3. Full-Width Product Grid (1 per row mobile, 3-4 desktop) */}
-      <div className="w-full">
-        <ProductGrid 
-          products={sortedProducts} 
-          isLoading={loading} 
-          emptyMessage="No products available yet."
-        />
-      </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+          {categories.map((category) => (
+            <CategoryCard
+              key={category._id || category.id || category.slug}
+              category={category}
+            />
+          ))}
+        </div>
+      )}
 
     </PageContainer>
   );

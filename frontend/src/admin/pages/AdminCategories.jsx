@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Plus,
   Search,
@@ -375,6 +376,7 @@ export const AdminCategories = () => {
                   <th className="py-3.5 px-4">Icon</th>
                   <th className="py-3.5 px-4">Name</th>
                   <th className="py-3.5 px-4">Slug</th>
+                  <th className="py-3.5 px-4 text-center">Collections</th>
                   <th className="py-3.5 px-4">Description</th>
                   <th className="py-3.5 px-4">Status</th>
                   <th className="py-3.5 px-4">Created Date</th>
@@ -391,6 +393,16 @@ export const AdminCategories = () => {
                     </td>
                     <td className="py-3 px-4 font-bold text-slate-900">{cat.name}</td>
                     <td className="py-3 px-4 text-slate-500 font-mono text-[11px]">{cat.slug}</td>
+                    <td className="py-3 px-4 text-center">
+                      <Link
+                        to="/admin/collections"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 font-extrabold text-[11px] border border-sky-200 hover:bg-sky-100 transition-colors"
+                        title={`View collections in ${cat.name}`}
+                      >
+                        <span>{cat.collectionCount || 0} collections</span>
+                        <span>→</span>
+                      </Link>
+                    </td>
                     <td className="py-3 px-4 text-slate-600 max-w-xs truncate">
                       {cat.description || 'No description provided'}
                     </td>

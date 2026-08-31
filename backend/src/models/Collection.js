@@ -57,6 +57,11 @@ const collectionSchema = new mongoose.Schema(
       default: true,
       index: true,
     },
+    isFeatured: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
   },
   {
     timestamps: true,
